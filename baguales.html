@@ -387,24 +387,34 @@ D.piezas.forEach(p=>{
     pal.position.copy(new THREE.Vector3(0, 0.028, 0).add(d.clone().multiplyScalar(0.02))); g.add(pal);
     g.position.copy(c);
   } else if (p.f==='sifon' && p.sif){                // sifón del lavamanos / lavaplatos / pileta: de la válvula de la batea a la salida al muro
-    g = new THREE.Group(); const m = matFit[p.s] || matFit.A, S = p.sif;
+    g = new THREE.Group(); const m = matFit[p.s] || matFit.A;
     const n = new THREE.Vector3(p.dir[0], 0, -p.dir[1]).normalize(), t = new THREE.Vector3().crossVectors(Y, n);
-    const r = S.lav ? 0.016 : 0.019, R = 0.035, caida = 0.02;
-    const A = n.clone().multiplyScalar(Math.max(0.06, S.v - 2*R)).add(t.clone().multiplyScalar(S.u));
+    const lista = p.sifs || [p.sif], dobl = lista.length > 1;
     g.add(new THREE.Mesh(new THREE.SphereGeometry(0.028, 18, 12), m));                                             // codo en el muro
-    g.add(cil(new THREE.Vector3(), A, r, m, 18));                                                                    // brazo horizontal al muro
-    const A2 = A.clone().add(new THREE.Vector3(0, -caida, 0));
-    g.add(cil(A, A2, r, m, 18));
-    const u = new THREE.Mesh(new THREE.TorusGeometry(R, r, 10, 22, Math.PI), m);                                     // curva en U (sello de agua)
-    u.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(n, Y.clone().negate(), new THREE.Vector3().crossVectors(n, Y.clone().negate())));
-    u.position.copy(A2.clone().add(n.clone().multiplyScalar(R))); g.add(u);
-    const B = A2.clone().add(n.clone().multiplyScalar(2*R)), T = new THREE.Vector3(B.x, Math.max(B.y + 0.05, S.z - 0.004), B.z);
-    g.add(cil(B, T, r * 0.85, m, 18));                                                                               // tubo de la válvula
-    [B.clone().add(new THREE.Vector3(0, 0.012, 0)), A.clone()].forEach(q=> g.add(anillo(q, Y, r * 1.18, 0.004, m))); // tuercas
-    g.add(cil(T.clone().add(new THREE.Vector3(0, -0.02, 0)), T, 0.022, matCromo, 20));                              // válvula
-    g.add(cil(T, T.clone().add(new THREE.Vector3(0, 0.004, 0)), 0.034, matCromo, 24));
+    const J = n.clone().multiplyScalar(dobl ? 0.09 : 0);
+    if (dobl){ g.add(cil(new THREE.Vector3(), J, 0.02, m, 18)); const y_ = new THREE.Mesh(new THREE.SphereGeometry(0.03, 18, 12), m); y_.position.copy(J); g.add(y_); }   // Y que junta los dos sifones
+    lista.forEach(S=>{
+      const r = S.lav ? 0.016 : 0.019, R = 0.035, caida = 0.02;
+      const A = n.clone().multiplyScalar(Math.max(dobl ? 0.11 : 0.06, S.v - 2*R)).add(t.clone().multiplyScalar(S.u));
+      let ini = J;
+      if (Math.abs(S.u) > 0.02){                                                                                        // brazo a lo largo del muro hasta frente a la batea
+        const K = J.clone().add(t.clone().multiplyScalar(S.u));
+        g.add(cil(J, K, r, m, 18)); const e = new THREE.Mesh(new THREE.SphereGeometry(r*1.25, 14, 10), m); e.position.copy(K); g.add(e); ini = K;
+      }
+      g.add(cil(ini, A, r, m, 18));                                                                                     // brazo horizontal
+      const A2 = A.clone().add(new THREE.Vector3(0, -caida, 0));
+      g.add(cil(A, A2, r, m, 18));
+      const u = new THREE.Mesh(new THREE.TorusGeometry(R, r, 10, 22, Math.PI), m);                                      // curva en U (sello de agua)
+      u.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(n, Y.clone().negate(), new THREE.Vector3().crossVectors(n, Y.clone().negate())));
+      u.position.copy(A2.clone().add(n.clone().multiplyScalar(R))); g.add(u);
+      const B = A2.clone().add(n.clone().multiplyScalar(2*R)), T = new THREE.Vector3(B.x, Math.max(B.y + 0.05, S.z - 0.004), B.z);
+      g.add(cil(B, T, r * 0.85, m, 18));                                                                                // tubo de la válvula
+      [B.clone().add(new THREE.Vector3(0, 0.012, 0)), A.clone()].forEach(q=> g.add(anillo(q, Y, r * 1.18, 0.004, m)));
+      g.add(cil(T.clone().add(new THREE.Vector3(0, -0.02, 0)), T, 0.022, matCromo, 20));                               // válvula
+      g.add(cil(T, T.clone().add(new THREE.Vector3(0, 0.004, 0)), 0.034, matCromo, 24));
+    });
     const ros = n.clone().multiplyScalar(0.045);
-    g.add(cil(ros, ros.clone().add(n.clone().multiplyScalar(0.006)), 0.034, matCromo, 24));                          // roseta en la cara del muro
+    g.add(cil(ros, ros.clone().add(n.clone().multiplyScalar(0.006)), 0.034, matCromo, 24));                           // roseta en la cara del muro
     g.position.copy(c);
   } else if (p.f==='pileta'){
     g = new THREE.Group();

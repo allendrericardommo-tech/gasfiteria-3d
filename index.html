@@ -29,7 +29,7 @@ const main = document.getElementById('main');
 const marcos = {};
 function abrir(obra){
   document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.obra===obra)));
-  if (!marcos[obra]){ const f = document.createElement('iframe'); f.src = obra + '.html'; f.title = 'Modelo 3D ' + obra; main.appendChild(f); marcos[obra] = f; }
+  if (!marcos[obra]){ const f = document.createElement('iframe'); f.src = obra + '.html?v=202611111714'; f.title = 'Modelo 3D ' + obra; main.appendChild(f); marcos[obra] = f; }
   Object.entries(marcos).forEach(([k,f])=>f.classList.toggle('activa', k===obra));
   try { history.replaceState(null, '', '#' + obra); } catch(e){}
 }
