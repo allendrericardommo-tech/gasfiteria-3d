@@ -249,6 +249,18 @@ function cuerpoNudo(n, p){
     const afuera = (dirs.find(o=>o!==abajo) || {d: p.dir ? new THREE.Vector3(p.dir[0],0,-p.dir[1]) : new THREE.Vector3(1,0,0)}).d;
     const r = abajo.r, {rf} = dimFit(s, r);
     boca(g, s, abajo.d, r);
+    if (/dos caras/.test(t)){
+      // tee con un terminal de hilo interior hacia cada cara del tabique (dos artefactos espalda con espalda)
+      const caras = dirs.filter(o=>o!==abajo).map(o=>o.d);
+      if (caras.length < 2 && p.dir){ const d0 = new THREE.Vector3(p.dir[0],0,-p.dir[1]); caras.splice(0, caras.length, d0, d0.clone().negate()); }
+      g.add(cil(caras[0].clone().multiplyScalar(0.022), caras[1].clone().multiplyScalar(0.022), rf, matFit[s]));
+      g.add(cil(new THREE.Vector3(), abajo.d.clone().multiplyScalar(0.016), rf, matFit[s]));
+      caras.forEach(a=>{
+        g.add(cil(a.clone().multiplyScalar(0.022), a.clone().multiplyScalar(0.034), rf*0.98, matBronce, 6));
+        g.add(anillo(a.clone().multiplyScalar(0.0342), a, 0.0085, 0.0018, matBronce));
+      });
+      return g;
+    }
     g.add(new THREE.Mesh(new THREE.SphereGeometry(rf, 20, 14), matFit[s]));
     g.add(cil(new THREE.Vector3(), afuera.clone().multiplyScalar(0.030), rf, matFit[s]));
     g.add(cil(afuera.clone().multiplyScalar(0.030), afuera.clone().multiplyScalar(0.045), rf*0.98, matBronce, 6));   // hexágono de bronce 1/2"
@@ -549,6 +561,12 @@ function parte(a, q, k){
     const pan = new THREE.Mesh(new THREE.BoxGeometry(W - 0.06, 0.08, 0.008), MAT.oscuro); pan.position.set(0, H/2 - 0.07, Dp/2 + 0.003); g.add(pan);
     const aro = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.022, 10, 36), MAT.cromo); aro.position.set(0, -0.06, Dp/2 + 0.01); g.add(aro);
     const vid = cilA(0.155, 0.01, MAT.vidrio, 32); vid.rotation.x = Math.PI/2; vid.position.set(0, -0.06, Dp/2 + 0.006); g.add(vid);
+  } else if (/^Refrigerador/.test(nom) && /dos puertas/.test(a.info||'')){
+    // side by side: dos puertas verticales, tiradores al centro y dispensador de hielo y agua en la puerta izquierda
+    caja(W, H, Dp, 0.04, MAT.loza, 0, 0, 0, true);
+    const sp = new THREE.Mesh(new THREE.BoxGeometry(0.008, H - 0.10, 0.006), MAT.oscuro); sp.position.set(-0.03, 0.03, Dp/2 + 0.002); g.add(sp);
+    [-0.07, 0.01].forEach(x=>{ const m = cilA(0.012, 0.70, MAT.cromo); m.position.set(x, 0.10, Dp/2 + 0.035); g.add(m); });
+    const disp = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.30, 0.012), MAT.oscuro); disp.position.set(-W/4 - 0.02, 0.18, Dp/2 + 0.004); g.add(disp);
   } else if (/^Refrigerador/.test(nom)){
     caja(W, H, Dp, 0.04, MAT.loza, 0, 0, 0, true);
     const sp = new THREE.Mesh(new THREE.BoxGeometry(W - 0.02, 0.008, 0.006), MAT.oscuro); sp.position.set(0, H/2 - 0.62, Dp/2 + 0.002); g.add(sp);
