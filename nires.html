@@ -1,0 +1,895 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>html,body{margin:0;padding:0}</style></head><body>
+<title>Gasfitería 3D Nueva Coyhaique</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: aplicación a pantalla completa — visor 3D a la izquierda, panel técnico a la derecha (abajo en teléfono) */
+:root{
+  --bg:#f3f4f2; --panel:#ffffff; --fg:#1d2321; --muted:#5d6763; --line:#d9ddda; --accent:#2a6f73;
+  --fria:#2f7fd8; --caliente:#e0533a; --alc:#9a6a3a; --vent:#2f9e63; --dren:#b9902f; --pieza:#f1c232;
+  --escena:#e9ecea; --chip:#eef1ef;
+  --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141917; --panel:#1b211f; --fg:#e4e8e6; --muted:#9aa5a0; --line:#2e3633; --accent:#6fb8bb;
+  --fria:#5ba3f0; --caliente:#f27a60; --alc:#c08a55; --vent:#55c086; --dren:#d4ad4c; --pieza:#f3cd52;
+  --escena:#1f2624; --chip:#252c29; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141917; --panel:#1b211f; --fg:#e4e8e6; --muted:#9aa5a0; --line:#2e3633; --accent:#6fb8bb;
+  --fria:#5ba3f0; --caliente:#f27a60; --alc:#c08a55; --vent:#55c086; --dren:#d4ad4c; --pieza:#f3cd52;
+  --escena:#1f2624; --chip:#252c29; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.45}
+.app{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 380px;grid-template-rows:auto minmax(0,1fr)}
+header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding-block:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  border-bottom:1px solid var(--line);background:var(--panel)}
+h1{font-size:16px;font-weight:600;margin:0;letter-spacing:.01em}
+.sub{color:var(--muted);font-size:12.5px}
+.vista{position:relative;min-width:0;min-height:0;background:var(--escena)}
+#lienzo{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.barra{position:absolute;left:12px;top:12px;right:12px;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
+.barra button,.capas label{pointer-events:auto}
+button{font:inherit;font-size:12.5px;border:1px solid var(--line);background:var(--panel);color:var(--fg);
+  border-radius:6px;padding:5px 9px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+.capas{position:absolute;left:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:6px;max-width:calc(100% - 24px)}
+.capas label{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);
+  border-radius:6px;padding:4px 8px;font-size:12.5px;cursor:pointer}
+.sw{width:12px;height:12px;border-radius:2px;display:inline-block}
+.info{position:absolute;right:12px;top:52px;width:min(320px,calc(100% - 24px));background:var(--panel);
+  border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+.info h3{margin:0 0 6px;font-size:13.5px}
+.info dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;margin:0}
+.info dt{color:var(--muted)} .info dd{margin:0;font-family:var(--mono);font-size:12.5px;overflow-wrap:anywhere}
+aside{background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;gap:4px;padding:10px 12px 0;flex-wrap:wrap}
+.tabs button{border-radius:6px 6px 0 0;border-bottom:none}
+.contenido{overflow:auto;padding:12px 14px 18px;border-top:1px solid var(--line);flex:1;min-height:0}
+.contenido h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px}
+.contenido h2:first-child{margin-top:0}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+th{color:var(--muted);font-weight:500}
+.ley{display:grid;grid-template-columns:18px minmax(0,1fr);gap:6px 8px;align-items:center}
+.ley .sw{width:18px;height:6px}
+.nota{border-left:3px solid var(--pieza);padding:6px 10px;background:var(--chip);border-radius:0 6px 6px 0;margin:6px 0}
+.nota b{font-weight:600}
+.medida{position:absolute;left:50%;transform:translateX(-50%);bottom:56px;background:var(--panel);border:1px solid var(--accent);
+  border-radius:8px;padding:6px 12px;font-family:var(--mono);font-size:13px}
+.mono{font-family:var(--mono)}
+#bCapas{display:none}
+@media (max-width:820px){
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 72vh auto;grid-template-rows:auto 72svh auto;height:auto;min-height:100%}
+  header{padding-block:8px}
+  header .sub{display:none}
+  h1{font-size:15px}
+  aside{border-left:none;border-top:1px solid var(--line)}
+  .contenido{max-height:none}
+  .barra{left:0;right:0;top:0;padding:8px;flex-wrap:nowrap;overflow-x:auto;pointer-events:auto;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch}
+  .barra::-webkit-scrollbar,.capas::-webkit-scrollbar,.tabs::-webkit-scrollbar{display:none}
+  .barra button{white-space:nowrap;flex:0 0 auto;padding:8px 11px;font-size:13px}
+  .capas{left:0;right:0;bottom:0;max-width:none;padding:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .capas label{white-space:nowrap;flex:0 0 auto;padding:7px 10px;font-size:13px}
+  .capas.oculta{display:none}
+  .info{left:8px;right:8px;top:auto;bottom:58px;width:auto;max-height:45%;overflow:auto}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;background:var(--panel);z-index:2;padding-bottom:0}
+  .tabs button{white-space:nowrap;flex:0 0 auto;padding:8px 12px}
+  #bCapas{display:inline-block}
+  .medida{bottom:64px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <header>
+    <div>
+      <h1>Gasfitería 3D · Casa Nueva Coyhaique</h1>
+      <div class="sub">Agua fría y caliente (PPR termofusión) y alcantarillado (PVC sanitario) leídos de tu planta de agua. Doble clic (o doble toque) sobre una unión, caño o salida para acercarte a ese punto. La rueda acerca hacia donde apunta el mouse. Con ◀ ▶ recorrés las piezas una por una.</div>
+    </div>
+  </header>
+
+  <div class="vista">
+    <canvas id="lienzo" aria-label="Modelo 3D de la instalación"></canvas>
+    <div class="barra" id="barra"></div>
+    <div class="capas" id="capas"></div>
+    <div class="info" id="info" hidden></div>
+    <div class="medida" id="medida" hidden></div>
+  </div>
+
+  <aside>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div class="contenido" id="contenido"></div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const D = {"muros":[[[1.5329,1.0074],[2.5719,1.0074],[2.5719,0.9134],[1.5369,0.9134],[1.5369,0.3134],[1.3029,0.3134],[1.3029,0.9174],[1.5329,0.9174]],[[5.6029,1.0074],[5.6029,3.0124],[5.6969,3.0124],[5.6969,2.8974],[5.8969,2.8974],[5.8969,2.8034],[5.6969,2.8034],[5.6969,1.0074],[6.6869,1.0074],[6.6869,0.9134],[5.6929,0.9134],[5.6929,1.0034],[5.6069,1.0034],[5.6069,0.9134],[4.5679,0.9134],[4.5679,1.0074]],[[1.3929,4.5334],[1.3029,4.5334],[1.3029,6.1474],[1.3969,6.1474],[1.3969,4.5374],[2.0069,4.5374],[2.0069,4.4434],[1.3969,4.4434],[1.3969,1.0034],[1.3029,1.0034],[1.3029,4.4474],[1.3929,4.4474]],[[6.3129,2.8034],[6.3129,2.8974],[7.0416,2.8974],[7.0416,2.8034]],[[4.9329,4.5374],[5.6029,4.5374],[5.6029,7.7334],[3.0669,7.7334],[3.0669,7.5284],[2.9729,7.5284],[2.9729,7.7334],[1.5329,7.7334],[1.5329,7.8234],[1.3029,7.8234],[1.3029,8.8274],[1.5369,8.8274],[1.5369,7.8274],[5.6069,7.8274],[5.6069,7.7374],[5.6929,7.7374],[5.6929,7.8274],[6.6819,7.8274],[6.6819,7.7334],[5.6969,7.7334],[5.6969,4.5334],[5.6069,4.5334],[5.6069,4.4474],[5.6969,4.4474],[5.6969,4.0874],[7.6969,4.0874],[7.6969,3.9934],[5.6969,3.9934],[5.6969,3.8784],[5.6029,3.8784],[5.6029,3.9974],[5.6929,3.9974],[5.6929,4.0834],[5.6029,4.0834],[5.6029,4.4434],[4.9329,4.4434]],[[2.9769,4.5334],[2.9769,4.4434],[2.8729,4.4434],[2.8729,4.5374],[2.9729,4.5374],[2.9729,7.1124],[3.0669,7.1124],[3.0669,4.5374],[3.7369,4.5374],[3.7369,4.4434],[3.0629,4.4434],[3.0629,4.5334]],[[1.3969,6.7434],[1.3029,6.7434],[1.3029,7.7374],[1.3969,7.7374]],[[11.9568,-2.4566],[11.7228,-2.4566],[11.7228,-1.6526],[11.9528,-1.6526],[11.9528,-1.5626],[12.4918,-1.5626],[12.4918,-1.6566],[11.9568,-1.6566]],[[16.1328,-1.5626],[16.1328,2.9274],[16.2268,2.9274],[16.2268,1.0074],[16.4743,1.0074],[16.4743,0.9134],[16.2268,0.9134],[16.2268,-1.5666],[16.1368,-1.5666],[16.1368,-1.6566],[15.6878,-1.6566],[15.6878,-1.5626]],[[10.6102,0.4074],[11.7228,0.4074],[11.7228,3.0124],[11.8168,3.0124],[11.8168,0.4034],[11.7268,0.4034],[11.7268,0.3174],[11.8168,0.3174],[11.8168,-1.5666],[11.7228,-1.5666],[11.7228,0.3134],[10.6102,0.3134]],[[7.2829,1.0074],[8.0076,1.0074],[8.0076,2.8034],[7.9076,2.8034],[7.9076,2.8974],[8.1016,2.8974],[8.1016,1.0034],[8.0116,1.0034],[8.0116,0.9174],[8.1016,0.9174],[8.1016,0.4074],[9.2142,0.4074],[9.2142,0.3134],[8.0976,0.3134],[8.0976,0.4034],[8.0076,0.4034],[8.0076,0.9134],[7.2829,0.9134]],[[9.7229,4.0874],[11.7228,4.0874],[11.7228,7.7334],[10.7379,7.7334],[10.7379,7.8274],[11.7268,7.8274],[11.7268,7.7374],[11.8128,7.7374],[11.8128,7.8274],[12.9468,7.8274],[12.9468,7.7334],[11.8168,7.7334],[11.8168,4.0834],[11.7268,4.0834],[11.7268,3.9974],[11.8168,3.9974],[11.8168,3.8784],[11.7228,3.8784],[11.7228,3.9934],[9.7229,3.9934]],[[16.1328,4.0874],[17.8368,4.0874],[17.8368,3.9974],[17.9228,3.9974],[17.9228,4.0874],[18.9128,4.0874],[18.9128,4.6694],[19.1068,4.6694],[19.1068,4.5754],[19.0068,4.5754],[19.0068,4.0834],[18.9168,4.0834],[18.9168,3.9934],[17.9268,3.9934],[17.9268,1.0074],[18.8018,1.0074],[18.8018,0.9134],[17.9268,0.9134],[17.9268,-0.1716],[17.6928,-0.1716],[17.6928,0.9134],[17.4403,0.9134],[17.4403,1.0074],[17.6968,1.0074],[17.6968,0.9174],[17.9228,0.9174],[17.9228,1.0034],[17.8328,1.0034],[17.8328,3.9934],[16.2268,3.9934],[16.2268,3.8934],[16.1328,3.8934]],[[7.6779,7.7334],[7.6779,7.8274],[8.6669,7.8274],[8.6669,7.7374],[8.7529,7.7374],[8.7529,7.8274],[9.7419,7.8274],[9.7419,7.7334],[8.7569,7.7334],[8.7569,4.0874],[8.8569,4.0874],[8.8569,3.9934],[8.5629,3.9934],[8.5629,4.0874],[8.6629,4.0874],[8.6629,7.7334]],[[15.1428,7.8274],[16.5568,7.8274],[16.5568,7.7334],[15.1428,7.7334]],[[17.9268,-1.3676],[17.9268,-2.4566],[17.6928,-2.4566],[17.6928,-1.3676]],[[24.3328,0.3134],[24.3328,0.9134],[24.1178,0.9134],[24.1178,1.0074],[24.3368,1.0074],[24.3368,0.9174],[24.5668,0.9174],[24.5668,0.3134]],[[20.6768,1.0034],[20.6768,0.9134],[19.7978,0.9134],[19.7978,1.0074],[20.6728,1.0074],[20.6728,3.0274],[20.7668,3.0274],[20.7668,1.0074],[21.1218,1.0074],[21.1218,0.9134],[20.7628,0.9134],[20.7628,1.0034]],[[20.6728,4.5754],[19.9728,4.5754],[19.9728,4.6694],[20.6728,4.6694],[20.6728,7.7334],[18.7528,7.7334],[18.7528,7.8274],[20.6768,7.8274],[20.6768,7.7374],[20.7628,7.7374],[20.7628,7.8274],[21.5218,7.8274],[21.5218,7.7334],[20.7668,7.7334],[20.7668,4.6654],[20.6768,4.6654],[20.6768,4.5794],[20.7668,4.5794],[20.7668,3.8934],[20.6728,3.8934]],[[24.4728,1.0034],[24.4728,7.7374],[24.5668,7.7374],[24.5668,1.0034]],[[24.5668,7.8234],[24.3368,7.8234],[24.3368,7.7334],[23.7178,7.7334],[23.7178,7.8274],[24.3328,7.8274],[24.3328,8.8274],[24.5668,8.8274]]],"tubos":[{"p":[[19.527,13.8791,-0.36],[19.527,5.7593,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":8.12}},{"p":[[19.527,5.7593,-0.36],[18.29,5.7593,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":1.24}},{"p":[[19.527,5.7593,-0.36],[19.527,4.1714,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":1.59}},{"p":[[18.29,5.7593,-0.36],[18.29,4.6244,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":1.13}},{"p":[[19.527,4.1714,-0.36],[19.527,3.289,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.88}},{"p":[[19.527,4.1714,-0.36],[20.566,4.1714,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":1.04}},{"p":[[19.527,3.289,-0.36],[17.8818,3.289,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":1.65}},{"p":[[20.566,4.1714,-0.36],[20.566,5.8455,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":1.67}},{"p":[[20.566,4.1714,-0.36],[20.6291,4.1714,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.06}},{"p":[[17.8818,3.289,-0.36],[17.421,3.289,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.46}},{"p":[[20.566,5.8455,-0.36],[20.7178,5.8455,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.15}},{"p":[[17.421,3.289,-0.36],[7.3376,3.289,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":10.08}},{"p":[[17.421,3.289,-0.36],[17.421,4.0424,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.75}},{"p":[[17.8818,3.289,-0.36],[17.8818,3.316,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.03}},{"p":[[7.3376,3.289,-0.36],[2.401,3.289,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":4.94}},{"p":[[7.3376,3.289,-0.36],[7.338,0.8,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":2.49}},{"p":[[2.401,3.289,-0.36],[2.401,6.0754,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":2.79}},{"p":[[7.338,0.8,-0.36],[7.235,0.8,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.1}},{"p":[[7.338,0.8,-0.36],[7.6305,0.8,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.29}},{"p":[[2.401,6.0754,-0.36],[1.18,6.077,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":1.22}},{"p":[[7.235,0.8,-0.36],[6.0585,0.8,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":1.18}},{"p":[[7.235,0.8,-0.36],[7.235,1.252,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.45}},{"p":[[7.235,1.252,-0.36],[10.6552,1.252,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":3.42}},{"p":[[7.6305,0.8,-0.36],[7.6305,0.9624,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.16}},{"p":[[1.18,6.077,-0.36],[1.18,5.75,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.33}},{"p":[[1.18,6.077,-0.36],[1.18,6.195,-0.36]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.12}},{"p":[[6.0585,0.8,-0.36],[6.0585,0.9624,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.16}},{"p":[[1.18,5.75,-0.36],[1.18,4.9925,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.76}},{"p":[[1.18,5.75,-0.36],[1.3519,5.75,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.17}},{"p":[[1.18,6.195,-0.36],[1.18,7.45,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":1.25}},{"p":[[1.18,6.195,-0.36],[1.3519,6.195,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.17}},{"p":[[1.18,4.9925,-0.36],[1.3519,4.9925,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.17}},{"p":[[1.18,7.45,-0.36],[1.789,7.45,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.61}},{"p":[[1.789,7.45,-0.36],[1.789,7.7784,-0.36]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm PN16 (agua fría)","ubicacion":"bajo el piso","largo":0.33}},{"p":[[1.789,7.7784,-0.36],[1.789,7.7784,0.95]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.95 m","largo":1.31}},{"p":[[1.789,7.7784,0.95],[1.789,7.7334,0.95]],"d":20,"s":"F","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[1.3519,6.195,-0.36],[1.3519,6.195,0.25]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.25 m","largo":0.61}},{"p":[[1.3519,6.195,0.25],[1.3969,6.195,0.25]],"d":20,"s":"F","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[1.3519,5.75,-0.36],[1.3519,5.75,0.5]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.50 m","largo":0.86}},{"p":[[1.3519,5.75,0.5],[1.3969,5.75,0.5]],"d":20,"s":"F","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[1.3519,4.9925,-0.36],[1.3519,4.9925,0.5]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.50 m","largo":0.86}},{"p":[[1.3519,4.9925,0.5],[1.3969,4.9925,0.5]],"d":20,"s":"F","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[6.0585,0.9624,-0.36],[6.0585,0.9624,0.95]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.95 m","largo":1.31}},{"p":[[6.0585,0.9624,0.95],[6.0585,1.0074,0.95]],"d":20,"s":"F","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[10.6552,1.252,-0.36],[10.6552,1.252,0.25]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.25 m","largo":0.61}},{"p":[[10.6552,1.252,0.25],[10.6102,1.252,0.25]],"d":20,"s":"F","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[7.6305,0.9624,-0.36],[7.6305,0.9624,0.5]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.50 m","largo":0.86}},{"p":[[7.6305,0.9624,0.5],[7.6305,1.0074,0.5]],"d":20,"s":"F","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[18.29,4.6244,-0.36],[18.29,4.6244,0.52]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.52 m","largo":0.88}},{"p":[[18.29,4.6244,0.52],[18.29,4.6694,0.52]],"d":20,"s":"F","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[20.7178,5.8455,-0.36],[20.7178,5.8455,0.52]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.52 m","largo":0.88}},{"p":[[20.7178,5.8455,0.52],[20.6728,5.8455,0.52]],"d":20,"s":"F","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[17.421,4.0424,-0.36],[17.421,4.0424,0.5]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.50 m","largo":0.86}},{"p":[[17.421,4.0424,0.5],[17.421,4.0874,0.5]],"d":20,"s":"F","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[17.8818,3.316,-0.36],[17.8818,3.316,0.72]],"d":20,"s":"F","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.72 m","largo":1.08}},{"p":[[17.8818,3.316,0.72],[17.9268,3.316,0.72]],"d":20,"s":"F","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[20.8,4.301,-0.3],[20.629,4.301,-0.3]],"d":32,"s":"C","i":{"tipo":"Tubería PPR Ø32 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.17}},{"p":[[20.629,4.301,-0.3],[19.3114,4.3014,-0.3]],"d":32,"s":"C","i":{"tipo":"Tubería PPR Ø32 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":1.32}},{"p":[[20.629,4.301,-0.3],[20.6291,5.9955,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":1.69}},{"p":[[19.3114,4.3014,-0.3],[19.3114,3.5959,-0.3]],"d":32,"s":"C","i":{"tipo":"Tubería PPR Ø32 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.71}},{"p":[[20.6291,5.9955,-0.3],[20.7178,5.9955,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.09}},{"p":[[19.3114,3.5959,-0.3],[17.78,3.5959,-0.3]],"d":32,"s":"C","i":{"tipo":"Tubería PPR Ø32 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":1.53}},{"p":[[17.78,3.5959,-0.3],[7.4713,3.5959,-0.3]],"d":32,"s":"C","i":{"tipo":"Tubería PPR Ø32 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":10.31}},{"p":[[17.78,3.5959,-0.3],[17.78,3.166,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.43}},{"p":[[19.3114,4.3014,-0.3],[19.3114,4.6244,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.32}},{"p":[[19.3114,4.6244,-0.3],[18.44,4.6244,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.87}},{"p":[[7.4713,3.5959,-0.3],[2.5288,3.5959,-0.3]],"d":32,"s":"C","i":{"tipo":"Tubería PPR Ø32 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":4.94}},{"p":[[7.4713,3.5959,-0.3],[7.4713,1.0283,-0.3]],"d":32,"s":"C","i":{"tipo":"Tubería PPR Ø32 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":2.57}},{"p":[[17.78,3.166,-0.3],[17.8818,3.166,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.1}},{"p":[[2.5288,3.5959,-0.3],[2.5288,5.9229,-0.3]],"d":32,"s":"C","i":{"tipo":"Tubería PPR Ø32 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":2.33}},{"p":[[7.4713,1.0283,-0.3],[6.1585,1.0283,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":1.31}},{"p":[[7.4713,1.0283,-0.3],[7.7805,1.0283,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.31}},{"p":[[2.5288,5.9229,-0.3],[1.24,5.923,-0.3]],"d":32,"s":"C","i":{"tipo":"Tubería PPR Ø32 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":1.29}},{"p":[[6.1585,1.0283,-0.3],[6.1585,0.9624,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.07}},{"p":[[7.7805,1.0283,-0.3],[7.7805,0.9624,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.07}},{"p":[[1.24,5.923,-0.3],[1.24,5.6,-0.3]],"d":32,"s":"C","i":{"tipo":"Tubería PPR Ø32 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.32}},{"p":[[1.24,5.6,-0.3],[1.24,4.8425,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.76}},{"p":[[1.24,5.6,-0.3],[1.3519,5.6,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.11}},{"p":[[1.24,5.923,-0.3],[1.24,7.7784,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":1.86}},{"p":[[1.24,7.7784,-0.3],[1.689,7.7784,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.45}},{"p":[[1.24,4.8425,-0.3],[1.3519,4.8425,-0.3]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm PN20 (agua caliente, con coquilla)","ubicacion":"bajo el piso","largo":0.11}},{"p":[[1.689,7.7784,-0.3],[1.689,7.7784,0.95]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.95 m","largo":1.25}},{"p":[[1.689,7.7784,0.95],[1.689,7.7334,0.95]],"d":20,"s":"C","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[1.3519,5.6,-0.3],[1.3519,5.6,0.5]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.50 m","largo":0.8}},{"p":[[1.3519,5.6,0.5],[1.3969,5.6,0.5]],"d":20,"s":"C","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[1.3519,4.8425,-0.3],[1.3519,4.8425,0.5]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.50 m","largo":0.8}},{"p":[[1.3519,4.8425,0.5],[1.3969,4.8425,0.5]],"d":20,"s":"C","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[6.1585,0.9624,-0.3],[6.1585,0.9624,0.95]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.95 m","largo":1.25}},{"p":[[6.1585,0.9624,0.95],[6.1585,1.0074,0.95]],"d":20,"s":"C","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[7.7805,0.9624,-0.3],[7.7805,0.9624,0.5]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.50 m","largo":0.8}},{"p":[[7.7805,0.9624,0.5],[7.7805,1.0074,0.5]],"d":20,"s":"C","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[18.44,4.6244,-0.3],[18.44,4.6244,0.52]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.52 m","largo":0.82}},{"p":[[18.44,4.6244,0.52],[18.44,4.6694,0.52]],"d":20,"s":"C","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[20.7178,5.9955,-0.3],[20.7178,5.9955,0.52]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.52 m","largo":0.82}},{"p":[[20.7178,5.9955,0.52],[20.6728,5.9955,0.52]],"d":20,"s":"C","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[17.8818,3.166,-0.3],[17.8818,3.166,0.72]],"d":20,"s":"C","i":{"tipo":"Tubería PPR Ø20 mm (subida dentro del tabique)","altura_salida":"0.72 m","largo":1.02}},{"p":[[17.8818,3.166,0.72],[17.9268,3.166,0.72]],"d":20,"s":"C","i":{"tipo":"Salida a la cara del muro","largo":0.045}},{"p":[[20.6291,4.1714,-0.36],[20.6291,4.1714,1.1]],"d":32,"s":"F","i":{"tipo":"Tubería PPR Ø32 mm (entrada de fría al termo)","largo":1.46}},{"p":[[20.8,4.301,-0.3],[20.8,4.301,1.1]],"d":32,"s":"C","i":{"tipo":"Tubería PPR Ø32 mm (salida de caliente del termo)","largo":1.4}},{"p":[[17.855,2.42,0.0],[17.855,2.42,-0.308]],"d":50,"s":"A","i":{"tipo":"Descarga PVC Ø50 mm (Lavadora)","largo":0.31}},{"p":[[17.855,2.42,-0.308],[17.863,2.62,-0.508]],"d":50,"s":"A","i":{"tipo":"Ramal PVC Ø50 mm (Lavadora, a 45°)","recinto":"Cocina / logia","largo":0.28}},{"p":[[18.365,5.85,-0.5684],[17.863,6.352,-0.5826]],"d":50,"s":"A","i":{"tipo":"Ramal PVC Ø50 mm (Lavaplatos)","recinto":"Cocina / logia","pendiente":"2 %","largo":0.71}},{"p":[[18.365,5.85,0.0],[18.365,5.85,-0.5684]],"d":50,"s":"A","i":{"tipo":"Descarga PVC Ø50 mm (Lavaplatos)","largo":0.57}},{"p":[[20.35,5.9,-0.553],[20.348,6.128,-0.5576],[18.213,8.263,-0.618],[17.863,8.613,-0.6279]],"d":50,"s":"A","i":{"tipo":"Ramal PVC Ø50 mm (Lavaplatos)","recinto":"Cocina / logia","pendiente":"2 %","largo":3.74}},{"p":[[20.35,5.9,0.0],[20.35,5.9,-0.553]],"d":50,"s":"A","i":{"tipo":"Descarga PVC Ø50 mm (Lavaplatos)","largo":0.55}},{"p":[[17.863,2.47,-0.505],[17.863,8.931,-0.6342]],"d":110,"s":"A","i":{"tipo":"Matriz PVC Ø110 mm","pendiente":"2 %","recinto":"Cocina / logia","largo":6.46}},{"p":[[7.72,0.9624,-0.4872],[6.985,1.6974,-0.508]],"d":50,"s":"A","i":{"tipo":"Ramal PVC Ø50 mm (Lavamanos)","recinto":"Baño sur","pendiente":"2 %","largo":1.04}},{"p":[[7.72,0.9624,0.45],[7.72,0.9624,-0.4872]],"d":50,"s":"A","i":{"tipo":"Descarga PVC Ø50 mm (Lavamanos, baja dentro del tabique)","largo":0.94}},{"p":[[7.235,1.55,-0.503],[7.235,1.7274,-0.5065],[6.985,1.9774,-0.5136]],"d":110,"s":"A","i":{"tipo":"Ramal PVC Ø110 mm (Inodoro)","recinto":"Baño sur","pendiente":"2 %","largo":0.53}},{"p":[[7.235,1.55,0.0],[7.235,1.55,-0.503]],"d":110,"s":"A","i":{"tipo":"Descarga PVC Ø110 mm (Inodoro)","largo":0.5}},{"p":[[6.11,1.18,-0.4904],[6.11,1.3824,-0.4945],[6.985,2.2574,-0.5192]],"d":50,"s":"A","i":{"tipo":"Ramal PVC Ø50 mm (Ducha (monomando con barra))","recinto":"Baño sur","pendiente":"2 %","largo":1.44}},{"p":[[6.11,1.18,0.0],[6.11,1.18,-0.4904]],"d":50,"s":"A","i":{"tipo":"Descarga PVC Ø50 mm (Ducha (monomando con barra))","largo":0.49}},{"p":[[6.985,1.5474,-0.505],[6.985,9.825,-0.6706]],"d":110,"s":"A","i":{"tipo":"Matriz PVC Ø110 mm","pendiente":"2 %","recinto":"Baño sur","largo":8.28}},{"p":[[1.575,7.33,-0.5031],[1.75,7.155,-0.508]],"d":50,"s":"A","i":{"tipo":"Ramal PVC Ø50 mm (Ducha (monomando con barra))","recinto":"Baño poniente","pendiente":"2 %","largo":0.25}},{"p":[[1.575,7.33,0.0],[1.575,7.33,-0.5031]],"d":50,"s":"A","i":{"tipo":"Descarga PVC Ø50 mm (Ducha (monomando con barra))","largo":0.5}},{"p":[[1.75,6.445,0.0],[1.75,6.445,-0.3262]],"d":110,"s":"A","i":{"tipo":"Descarga PVC Ø110 mm (Inodoro)","largo":0.33}},{"p":[[1.75,6.445,-0.3262],[1.75,6.245,-0.5262]],"d":110,"s":"A","i":{"tipo":"Ramal PVC Ø110 mm (Inodoro, a 45°)","recinto":"Baño poniente","largo":0.28}},{"p":[[1.3519,5.68,-0.5342],[1.75,5.2819,-0.5455]],"d":50,"s":"A","i":{"tipo":"Ramal PVC Ø50 mm (Lavamanos)","recinto":"Baño poniente","pendiente":"2 %","largo":0.56}},{"p":[[1.3519,5.68,0.45],[1.3519,5.68,-0.5342]],"d":50,"s":"A","i":{"tipo":"Descarga PVC Ø50 mm (Lavamanos, baja dentro del tabique)","largo":0.98}},{"p":[[1.3519,4.92,-0.5494],[1.75,4.5219,-0.5607]],"d":50,"s":"A","i":{"tipo":"Ramal PVC Ø50 mm (Lavamanos)","recinto":"Baño poniente","pendiente":"2 %","largo":0.56}},{"p":[[1.3519,4.92,0.45],[1.3519,4.92,-0.5494]],"d":50,"s":"A","i":{"tipo":"Descarga PVC Ø50 mm (Lavamanos, baja dentro del tabique)","largo":1.0}},{"p":[[1.75,7.305,-0.505],[1.75,4.346,-0.5642]],"d":110,"s":"A","i":{"tipo":"Matriz PVC Ø110 mm","pendiente":"2 %","recinto":"Baño poniente","largo":2.96}},{"p":[[1.75,4.346,-0.5642],[0.295,2.891,-0.6053]],"d":110,"s":"A","i":{"tipo":"Matriz PVC Ø110 mm","recinto":"Baño poniente","pendiente":"2 %","largo":2.06}},{"p":[[1.75,7.305,-0.505],[1.75,7.54,-0.5026],[2.1,7.89,-0.4977]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (prolongación de la cabeza de la matriz, enterrada)","recinto":"Baño poniente","pendiente":"sube 1 %","largo":0.73}},{"p":[[2.1,7.89,-0.4977],[2.1,7.89,0.6]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (sube adosada al muro exterior)","recinto":"Baño poniente","remate":"cuello de ganso a 0,60 m sobre N,P,T,","largo":1.1}},{"p":[[2.1,7.89,0.6],[2.1,8.03,0.6014]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (cuello de ganso)","pendiente":"sube 1 %","largo":0.14}},{"p":[[2.1,8.03,0.6014],[2.1,8.03,0.48]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (boca hacia abajo)","largo":0.12}},{"p":[[17.863,8.07,-0.617],[18.063,7.87,-0.6142]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (sale de la matriz a 45°, enterrada)","recinto":"Cocina / logia","pendiente":"sube 1 %","largo":0.28}},{"p":[[18.063,7.87,-0.6142],[19.763,7.87,-0.5972]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (enterrada, junto a la fachada)","recinto":"Cocina / logia","pendiente":"sube 1 %","largo":1.7}},{"p":[[19.763,7.87,-0.5972],[19.763,7.87,0.6]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (sube adosada al muro exterior)","recinto":"Cocina / logia","remate":"cuello de ganso a 0,60 m sobre N,P,T,","largo":1.2}},{"p":[[19.763,7.87,0.6],[19.763,8.01,0.6014]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (cuello de ganso)","pendiente":"sube 1 %","largo":0.14}},{"p":[[19.763,8.01,0.6014],[19.763,8.01,0.48]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (boca hacia abajo)","largo":0.12}},{"p":[[6.985,8.0874,-0.6358],[6.785,7.8874,-0.633]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (sale de la matriz a 45°, enterrada)","recinto":"Baño sur","pendiente":"sube 1 %","largo":0.28}},{"p":[[6.785,7.8874,-0.633],[4.085,7.8874,-0.606]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (enterrada, junto a la fachada)","recinto":"Baño sur","pendiente":"sube 1 %","largo":2.7}},{"p":[[4.085,7.8874,-0.606],[4.085,7.8874,0.6]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (sube adosada al muro exterior)","recinto":"Baño sur","remate":"cuello de ganso a 0,60 m sobre N,P,T,","largo":1.21}},{"p":[[4.085,7.8874,0.6],[4.085,8.0274,0.6014]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (cuello de ganso)","pendiente":"sube 1 %","largo":0.14}},{"p":[[4.085,8.0274,0.6014],[4.085,8.0274,0.48]],"d":75,"s":"V","i":{"tipo":"Ventilación PVC Ø75 mm (boca hacia abajo)","largo":0.12}},{"p":[[17.863,9.531,-0.6842],[17.863,9.825,-0.6901]],"d":110,"s":"A","i":{"tipo":"PVC Ø110 mm desgrasadora → cámara","pendiente":"2 %","largo":0.29}},{"p":[[17.563,10.125,-0.6961],[7.285,10.125,-0.9017]],"d":110,"s":"A","i":{"tipo":"Colector PVC Ø110 mm","pendiente":"2 %","largo":10.28}},{"p":[[6.685,10.125,-0.9017],[0.305,10.125,-1.0293]],"d":110,"s":"A","i":{"tipo":"Colector PVC Ø110 mm","pendiente":"2 %","largo":6.38}},{"p":[[0.005,9.825,-1.0293],[0.005,3.064,-1.1645]],"d":110,"s":"A","i":{"tipo":"Colector PVC Ø110 mm","pendiente":"2 %","largo":6.76}},{"p":[[0.005,2.464,-1.1645],[0.005,-0.911,-1.232]],"d":110,"s":"A","i":{"tipo":"PVC Ø110 mm cámara → fosa","pendiente":"2 %","largo":3.38}},{"p":[[0.005,-2.611,-1.312],[0.005,-3.393,-1.332]],"d":110,"s":"A","i":{"tipo":"PVC Ø110 mm fosa → repartidora","largo":0.78}},{"p":[[0.005,-3.993,-1.332],[0.005,-6.493,-1.342]],"d":110,"s":"D","i":{"tipo":"Dren PVC Ø110 mm perforado en zanja con grava y geotextil","largo_dren":"2,50 m","largo":2.5}},{"p":[[0.2507,-3.8651,-1.332],[2.2986,-5.299,-1.342]],"d":110,"s":"D","i":{"tipo":"Dren PVC Ø110 mm perforado en zanja con grava y geotextil","largo_dren":"2,50 m","largo":2.5}},{"p":[[-0.2407,-3.8651,-1.332],[-2.2886,-5.299,-1.342]],"d":110,"s":"D","i":{"tipo":"Dren PVC Ø110 mm perforado en zanja con grava y geotextil","largo_dren":"2,50 m","largo":2.5}}],"piezas":[{"p":[19.527,5.7593,-0.36],"t":"Tee reducida PPR 32-20-32","s":"F","d":32,"f":"nudo","i":{}},{"p":[18.29,5.7593,-0.36],"t":"Codo 90° PPR 20 mm","s":"F","d":20,"f":"nudo","i":{}},{"p":[19.527,4.1714,-0.36],"t":"Tee PPR 32 mm","s":"F","d":32,"f":"nudo","i":{}},{"p":[19.527,3.289,-0.36],"t":"Codo 90° PPR 32 mm","s":"F","d":32,"f":"nudo","i":{}},{"p":[20.566,4.1714,-0.36],"t":"Tee reducida PPR 32-20-32","s":"F","d":32,"f":"nudo","i":{}},{"p":[17.8818,3.289,-0.36],"t":"Tee reducida PPR 32-20-32","s":"F","d":32,"f":"nudo","i":{}},{"p":[20.566,5.8455,-0.36],"t":"Codo 90° PPR 20 mm","s":"F","d":20,"f":"nudo","i":{}},{"p":[17.421,3.289,-0.36],"t":"Tee reducida PPR 32-20-32","s":"F","d":32,"f":"nudo","i":{}},{"p":[7.3376,3.289,-0.36],"t":"Tee PPR 32 mm","s":"F","d":32,"f":"nudo","i":{}},{"p":[2.401,3.289,-0.36],"t":"Codo 90° PPR 32 mm","s":"F","d":32,"f":"nudo","i":{}},{"p":[7.338,0.8,-0.36],"t":"Tee reducida PPR 32-20-32","s":"F","d":32,"f":"nudo","i":{}},{"p":[2.401,6.0754,-0.36],"t":"Codo 90° PPR 32 mm","s":"F","d":32,"f":"nudo","i":{}},{"p":[7.235,0.8,-0.36],"t":"Tee PPR 20 mm + copla reducción 32-20","s":"F","d":20,"f":"nudo","i":{}},{"p":[7.6305,0.8,-0.36],"t":"Codo 90° PPR 20 mm","s":"F","d":20,"f":"nudo","i":{}},{"p":[1.18,6.077,-0.36],"t":"Tee PPR 32 mm","s":"F","d":32,"f":"nudo","i":{}},{"p":[6.0585,0.8,-0.36],"t":"Codo 90° PPR 20 mm","s":"F","d":20,"f":"nudo","i":{}},{"p":[7.235,1.252,-0.36],"t":"Codo 90° PPR 20 mm","s":"F","d":20,"f":"nudo","i":{}},{"p":[1.18,5.75,-0.36],"t":"Tee PPR 20 mm + copla reducción 32-20","s":"F","d":20,"f":"nudo","i":{}},{"p":[1.18,6.195,-0.36],"t":"Tee PPR 20 mm + copla reducción 32-20","s":"F","d":20,"f":"nudo","i":{}},{"p":[1.18,4.9925,-0.36],"t":"Codo 90° PPR 20 mm","s":"F","d":20,"f":"nudo","i":{}},{"p":[1.18,7.45,-0.36],"t":"Codo 90° PPR 20 mm","s":"F","d":20,"f":"nudo","i":{}},{"p":[1.789,7.45,-0.36],"t":"Codo 90° PPR 20 mm","s":"F","d":20,"f":"nudo","i":{}},{"p":[1.789,7.7784,-0.36],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"F","d":20,"f":"nudo","i":{}},{"p":[1.789,7.7784,0.95],"t":"Codo doble fijación PPR 20-1/2\" (salida monomando)","s":"F","d":20,"f":"salida","i":{"altura":"0.95 m"},"dir":[0.0,-1.0,0]},{"p":[1.3519,6.195,-0.36],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"F","d":20,"f":"nudo","i":{}},{"p":[1.3519,6.195,0.25],"t":"Codo HI PPR 20-1/2\" (salida)","s":"F","d":20,"f":"salida","i":{"altura":"0.25 m"}},{"p":[1.4319,6.195,0.25],"t":"Llave angular HE-HE 1/2\"","s":"F","d":20,"f":"angular","i":{"altura":"0.25 m","artefacto":"Inodoro"},"dir":[1.0,0.0,0]},{"p":[1.3519,5.75,-0.36],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"F","d":20,"f":"nudo","i":{}},{"p":[1.3519,5.75,0.5],"t":"Codo HI PPR 20-1/2\" (salida)","s":"F","d":20,"f":"salida","i":{"altura":"0.50 m"}},{"p":[1.4319,5.75,0.5],"t":"Llave angular HE-HE 1/2\"","s":"F","d":20,"f":"angular","i":{"altura":"0.50 m","artefacto":"Lavamanos"},"dir":[1.0,0.0,0]},{"p":[1.3519,4.9925,-0.36],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"F","d":20,"f":"nudo","i":{}},{"p":[1.3519,4.9925,0.5],"t":"Codo HI PPR 20-1/2\" (salida)","s":"F","d":20,"f":"salida","i":{"altura":"0.50 m"}},{"p":[1.4319,4.9925,0.5],"t":"Llave angular HE-HE 1/2\"","s":"F","d":20,"f":"angular","i":{"altura":"0.50 m","artefacto":"Lavamanos"},"dir":[1.0,0.0,0]},{"p":[6.0585,0.9624,-0.36],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"F","d":20,"f":"nudo","i":{}},{"p":[6.0585,0.9624,0.95],"t":"Codo doble fijación PPR 20-1/2\" (salida monomando)","s":"F","d":20,"f":"salida","i":{"altura":"0.95 m"},"dir":[0.0,1.0,0]},{"p":[10.6552,1.252,-0.36],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"F","d":20,"f":"nudo","i":{}},{"p":[10.6552,1.252,0.25],"t":"Codo HI PPR 20-1/2\" (salida)","s":"F","d":20,"f":"salida","i":{"altura":"0.25 m"}},{"p":[10.5752,1.252,0.25],"t":"Llave angular HE-HE 1/2\"","s":"F","d":20,"f":"angular","i":{"altura":"0.25 m","artefacto":"Inodoro"},"dir":[-1.0,0.0,0]},{"p":[7.6305,0.9624,-0.36],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"F","d":20,"f":"nudo","i":{}},{"p":[7.6305,0.9624,0.5],"t":"Codo HI PPR 20-1/2\" (salida)","s":"F","d":20,"f":"salida","i":{"altura":"0.50 m"}},{"p":[7.6305,1.0424,0.5],"t":"Llave angular HE-HE 1/2\"","s":"F","d":20,"f":"angular","i":{"altura":"0.50 m","artefacto":"Lavamanos"},"dir":[0.0,1.0,0]},{"p":[18.29,4.6244,-0.36],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"F","d":20,"f":"nudo","i":{}},{"p":[18.29,4.6244,0.52],"t":"Codo HI PPR 20-1/2\" (salida)","s":"F","d":20,"f":"salida","i":{"altura":"0.52 m"}},{"p":[18.29,4.7044,0.52],"t":"Llave angular HE-HE 1/2\"","s":"F","d":20,"f":"angular","i":{"altura":"0.52 m","artefacto":"Lavaplatos"},"dir":[0.0,1.0,0]},{"p":[20.7178,5.8455,-0.36],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"F","d":20,"f":"nudo","i":{}},{"p":[20.7178,5.8455,0.52],"t":"Codo HI PPR 20-1/2\" (salida)","s":"F","d":20,"f":"salida","i":{"altura":"0.52 m"}},{"p":[20.6378,5.8455,0.52],"t":"Llave angular HE-HE 1/2\"","s":"F","d":20,"f":"angular","i":{"altura":"0.52 m","artefacto":"Lavaplatos"},"dir":[-1.0,0.0,0]},{"p":[17.421,4.0424,-0.36],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"F","d":20,"f":"nudo","i":{}},{"p":[17.421,4.0424,0.5],"t":"Codo HI PPR 20-1/2\" (salida)","s":"F","d":20,"f":"salida","i":{"altura":"0.50 m"}},{"p":[17.421,4.1224,0.5],"t":"Llave angular HE-HE 1/2\"","s":"F","d":20,"f":"angular","i":{"altura":"0.50 m","artefacto":"Refrigerador"},"dir":[0.0,1.0,0]},{"p":[17.8818,3.316,-0.36],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"F","d":20,"f":"nudo","i":{}},{"p":[17.8818,3.316,0.72],"t":"Codo HI PPR 20-1/2\" (salida)","s":"F","d":20,"f":"salida","i":{"altura":"0.72 m"}},{"p":[17.9618,3.316,0.72],"t":"Llave angular HE-HE 1/2\"","s":"F","d":20,"f":"angular","i":{"altura":"0.72 m","artefacto":"Lavadora"},"dir":[1.0,0.0,0]},{"p":[20.629,4.301,-0.3],"t":"Tee reducida PPR 32-20-32","s":"C","d":32,"f":"nudo","i":{}},{"p":[19.3114,4.3014,-0.3],"t":"Tee reducida PPR 32-20-32","s":"C","d":32,"f":"nudo","i":{}},{"p":[20.6291,5.9955,-0.3],"t":"Codo 90° PPR 20 mm","s":"C","d":20,"f":"nudo","i":{}},{"p":[19.3114,3.5959,-0.3],"t":"Codo 90° PPR 32 mm","s":"C","d":32,"f":"nudo","i":{}},{"p":[17.78,3.5959,-0.3],"t":"Tee reducida PPR 32-20-32","s":"C","d":32,"f":"nudo","i":{}},{"p":[7.4713,3.5959,-0.3],"t":"Tee PPR 32 mm","s":"C","d":32,"f":"nudo","i":{}},{"p":[17.78,3.166,-0.3],"t":"Codo 90° PPR 20 mm","s":"C","d":20,"f":"nudo","i":{}},{"p":[19.3114,4.6244,-0.3],"t":"Codo 90° PPR 20 mm","s":"C","d":20,"f":"nudo","i":{}},{"p":[2.5288,3.5959,-0.3],"t":"Codo 90° PPR 32 mm","s":"C","d":32,"f":"nudo","i":{}},{"p":[7.4713,1.0283,-0.3],"t":"Tee PPR 20 mm + copla reducción 32-20","s":"C","d":20,"f":"nudo","i":{}},{"p":[2.5288,5.9229,-0.3],"t":"Codo 90° PPR 32 mm","s":"C","d":32,"f":"nudo","i":{}},{"p":[6.1585,1.0283,-0.3],"t":"Codo 90° PPR 20 mm","s":"C","d":20,"f":"nudo","i":{}},{"p":[7.7805,1.0283,-0.3],"t":"Codo 90° PPR 20 mm","s":"C","d":20,"f":"nudo","i":{}},{"p":[1.24,5.923,-0.3],"t":"Tee reducida PPR 32-20-32","s":"C","d":32,"f":"nudo","i":{}},{"p":[1.24,5.6,-0.3],"t":"Tee PPR 20 mm + copla reducción 32-20","s":"C","d":20,"f":"nudo","i":{}},{"p":[1.24,4.8425,-0.3],"t":"Codo 90° PPR 20 mm","s":"C","d":20,"f":"nudo","i":{}},{"p":[1.24,7.7784,-0.3],"t":"Codo 90° PPR 20 mm","s":"C","d":20,"f":"nudo","i":{}},{"p":[1.689,7.7784,-0.3],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"C","d":20,"f":"nudo","i":{}},{"p":[1.689,7.7784,0.95],"t":"Codo doble fijación PPR 20-1/2\" (salida monomando)","s":"C","d":20,"f":"salida","i":{"altura":"0.95 m"},"dir":[0.0,-1.0,0]},{"p":[1.3519,5.6,-0.3],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"C","d":20,"f":"nudo","i":{}},{"p":[1.3519,5.6,0.5],"t":"Codo HI PPR 20-1/2\" (salida)","s":"C","d":20,"f":"salida","i":{"altura":"0.50 m"}},{"p":[1.4319,5.6,0.5],"t":"Llave angular HE-HE 1/2\"","s":"C","d":20,"f":"angular","i":{"altura":"0.50 m","artefacto":"Lavamanos"},"dir":[1.0,0.0,0]},{"p":[1.3519,4.8425,-0.3],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"C","d":20,"f":"nudo","i":{}},{"p":[1.3519,4.8425,0.5],"t":"Codo HI PPR 20-1/2\" (salida)","s":"C","d":20,"f":"salida","i":{"altura":"0.50 m"}},{"p":[1.4319,4.8425,0.5],"t":"Llave angular HE-HE 1/2\"","s":"C","d":20,"f":"angular","i":{"altura":"0.50 m","artefacto":"Lavamanos"},"dir":[1.0,0.0,0]},{"p":[6.1585,0.9624,-0.3],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"C","d":20,"f":"nudo","i":{}},{"p":[6.1585,0.9624,0.95],"t":"Codo doble fijación PPR 20-1/2\" (salida monomando)","s":"C","d":20,"f":"salida","i":{"altura":"0.95 m"},"dir":[0.0,1.0,0]},{"p":[7.7805,0.9624,-0.3],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"C","d":20,"f":"nudo","i":{}},{"p":[7.7805,0.9624,0.5],"t":"Codo HI PPR 20-1/2\" (salida)","s":"C","d":20,"f":"salida","i":{"altura":"0.50 m"}},{"p":[7.7805,1.0424,0.5],"t":"Llave angular HE-HE 1/2\"","s":"C","d":20,"f":"angular","i":{"altura":"0.50 m","artefacto":"Lavamanos"},"dir":[0.0,1.0,0]},{"p":[18.44,4.6244,-0.3],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"C","d":20,"f":"nudo","i":{}},{"p":[18.44,4.6244,0.52],"t":"Codo HI PPR 20-1/2\" (salida)","s":"C","d":20,"f":"salida","i":{"altura":"0.52 m"}},{"p":[18.44,4.7044,0.52],"t":"Llave angular HE-HE 1/2\"","s":"C","d":20,"f":"angular","i":{"altura":"0.52 m","artefacto":"Lavaplatos"},"dir":[0.0,1.0,0]},{"p":[20.7178,5.9955,-0.3],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"C","d":20,"f":"nudo","i":{}},{"p":[20.7178,5.9955,0.52],"t":"Codo HI PPR 20-1/2\" (salida)","s":"C","d":20,"f":"salida","i":{"altura":"0.52 m"}},{"p":[20.6378,5.9955,0.52],"t":"Llave angular HE-HE 1/2\"","s":"C","d":20,"f":"angular","i":{"altura":"0.52 m","artefacto":"Lavaplatos"},"dir":[-1.0,0.0,0]},{"p":[17.8818,3.166,-0.3],"t":"Codo 90° PPR 20 mm (dentro del tabique)","s":"C","d":20,"f":"nudo","i":{}},{"p":[17.8818,3.166,0.72],"t":"Codo HI PPR 20-1/2\" (salida)","s":"C","d":20,"f":"salida","i":{"altura":"0.72 m"}},{"p":[17.9618,3.166,0.72],"t":"Llave angular HE-HE 1/2\"","s":"C","d":20,"f":"angular","i":{"altura":"0.72 m","artefacto":"Lavadora"},"dir":[1.0,0.0,0]},{"p":[1.3519,5.75,0.25],"t":"Llave de paso campana PPR 20 mm","s":"F","d":20,"f":"llave","i":{"altura":"0,25 m","recinto":"Baño poniente","corta":"Corta todo el recinto"},"dir":[1.0,0.0,0]},{"p":[1.3519,5.6,0.25],"t":"Llave de paso campana PPR 20 mm","s":"C","d":20,"f":"llave","i":{"altura":"0,25 m","recinto":"Baño poniente","corta":"Corta todo el recinto"},"dir":[1.0,0.0,0]},{"p":[7.6305,0.9624,0.25],"t":"Llave de paso campana PPR 20 mm","s":"F","d":20,"f":"llave","i":{"altura":"0,25 m","recinto":"Baño sur","corta":"Corta todo el recinto"},"dir":[0.0,1.0,0]},{"p":[7.7805,0.9624,0.25],"t":"Llave de paso campana PPR 20 mm","s":"C","d":20,"f":"llave","i":{"altura":"0,25 m","recinto":"Baño sur","corta":"Corta todo el recinto"},"dir":[0.0,1.0,0]},{"p":[18.29,4.6244,0.25],"t":"Llave de paso campana PPR 20 mm","s":"F","d":20,"f":"llave","i":{"altura":"0,25 m","recinto":"Cocina","corta":"Corta todo el recinto"},"dir":[0.0,1.0,0]},{"p":[18.44,4.6244,0.25],"t":"Llave de paso campana PPR 20 mm","s":"C","d":20,"f":"llave","i":{"altura":"0,25 m","recinto":"Cocina","corta":"Corta todo el recinto"},"dir":[0.0,1.0,0]},{"p":[20.6291,4.1714,-0.36],"t":"Codo 90° PPR 32 mm (subida al termo)","s":"F","d":32,"f":"nudo","i":{}},{"p":[20.6291,4.1714,0.6],"t":"Llave de paso campana PPR 32 mm (entrada al termo)","s":"F","d":32,"f":"llave","i":{"altura":"0,60 m"},"dir":[0,-1,0]},{"p":[20.6291,4.1714,1.1],"t":"Terminal HE PPR 32-3/4\" (conexión al termo)","s":"F","d":32,"f":"salida","i":{"altura":"1.10 m"}},{"p":[20.8,4.301,-0.3],"t":"Codo 90° PPR 32 mm (subida al termo)","s":"C","d":32,"f":"nudo","i":{}},{"p":[20.8,4.301,1.1],"t":"Terminal HE PPR 32-3/4\" (conexión al termo)","s":"C","d":32,"f":"salida","i":{"altura":"1.10 m"}},{"p":[19.527,13.879,-0.36],"t":"Llave de bola PPR 32 mm (general)","s":"F","d":32,"f":"llave","i":{}},{"p":[17.863,2.47,-0.505],"t":"Tapón PVC 110 mm (cabeza de matriz)","s":"A","d":110,"f":"tapon","i":{}},{"p":[17.855,2.42,-0.308],"t":"Codo 45° PVC 50 mm (descarga)","s":"A","d":50,"f":"nudo","i":{}},{"p":[17.863,2.62,-0.508],"t":"Ramal Y 45° reductor PVC 110×50","s":"A","d":110,"f":"nudo","i":{}},{"p":[18.365,5.85,-0.5684],"t":"Codo 87,5° PVC 50 mm (descarga)","s":"A","d":50,"f":"nudo","i":{}},{"p":[17.863,6.352,-0.5826],"t":"Ramal Y 45° reductor PVC 110×50","s":"A","d":110,"f":"nudo","i":{}},{"p":[20.348,6.128,-0.5576],"t":"Codo 45° PVC 50 mm","s":"A","d":50,"f":"nudo","i":{}},{"p":[20.35,5.9,-0.553],"t":"Codo 87,5° PVC 50 mm (descarga)","s":"A","d":50,"f":"nudo","i":{}},{"p":[17.863,8.613,-0.6279],"t":"Ramal Y 45° reductor PVC 110×50","s":"A","d":110,"f":"nudo","i":{}},{"p":[6.985,1.5474,-0.505],"t":"Tapón PVC 110 mm (cabeza de matriz)","s":"A","d":110,"f":"tapon","i":{}},{"p":[7.72,0.9624,0.45],"t":"Codo 87,5° PVC 50 mm (salida del sifón al muro, 0,45 m)","s":"A","d":50,"f":"nudo","i":{}},{"p":[7.72,0.9624,-0.4872],"t":"Codo 87,5° PVC 50 mm (descarga)","s":"A","d":50,"f":"nudo","i":{}},{"p":[6.985,1.6974,-0.508],"t":"Ramal Y 45° reductor PVC 110×50","s":"A","d":110,"f":"nudo","i":{}},{"p":[7.235,1.7274,-0.5065],"t":"Codo 45° PVC 110 mm","s":"A","d":110,"f":"nudo","i":{}},{"p":[7.235,1.55,-0.503],"t":"Codo 87,5° PVC 110 mm (descarga)","s":"A","d":110,"f":"nudo","i":{}},{"p":[6.985,1.9774,-0.5136],"t":"Ramal Y 45° PVC 110×110","s":"A","d":110,"f":"nudo","i":{}},{"p":[6.11,1.3824,-0.4945],"t":"Codo 45° PVC 50 mm","s":"A","d":50,"f":"nudo","i":{}},{"p":[6.11,1.18,0.0],"t":"Pileta de piso sifonada Ø50 (ducha)","s":"A","d":50,"f":"pileta","i":{"recinto":"Baño sur"}},{"p":[6.11,1.18,-0.4904],"t":"Codo 87,5° PVC 50 mm (descarga)","s":"A","d":50,"f":"nudo","i":{}},{"p":[6.985,2.2574,-0.5192],"t":"Ramal Y 45° reductor PVC 110×50","s":"A","d":110,"f":"nudo","i":{}},{"p":[1.575,7.33,0.0],"t":"Pileta de piso sifonada Ø50 (ducha)","s":"A","d":50,"f":"pileta","i":{"recinto":"Baño poniente"}},{"p":[1.575,7.33,-0.5031],"t":"Codo 87,5° PVC 50 mm (descarga)","s":"A","d":50,"f":"nudo","i":{}},{"p":[1.75,7.155,-0.508],"t":"Ramal Y 45° reductor PVC 110×50","s":"A","d":110,"f":"nudo","i":{}},{"p":[1.75,6.445,-0.3262],"t":"Codo 45° PVC 110 mm (descarga)","s":"A","d":110,"f":"nudo","i":{}},{"p":[1.75,6.245,-0.5262],"t":"Ramal Y 45° PVC 110×110","s":"A","d":110,"f":"nudo","i":{}},{"p":[1.3519,5.68,0.45],"t":"Codo 87,5° PVC 50 mm (salida del sifón al muro, 0,45 m)","s":"A","d":50,"f":"nudo","i":{}},{"p":[1.3519,5.68,-0.5342],"t":"Codo 87,5° PVC 50 mm (descarga)","s":"A","d":50,"f":"nudo","i":{}},{"p":[1.75,5.2819,-0.5455],"t":"Ramal Y 45° reductor PVC 110×50","s":"A","d":110,"f":"nudo","i":{}},{"p":[1.3519,4.92,0.45],"t":"Codo 87,5° PVC 50 mm (salida del sifón al muro, 0,45 m)","s":"A","d":50,"f":"nudo","i":{}},{"p":[1.3519,4.92,-0.5494],"t":"Codo 87,5° PVC 50 mm (descarga)","s":"A","d":50,"f":"nudo","i":{}},{"p":[1.75,4.5219,-0.5607],"t":"Ramal Y 45° reductor PVC 110×50","s":"A","d":110,"f":"nudo","i":{}},{"p":[1.75,4.346,-0.5642],"t":"Codo 45° PVC 110 mm","s":"A","d":110,"f":"nudo","i":{}},{"p":[1.75,7.305,-0.505],"t":"Reducción PVC 110×75 (cabeza de matriz, sigue la ventilación)","s":"A","d":110,"f":"nudo","i":{}},{"p":[1.75,7.54,-0.5026],"t":"Codo 45° PVC 75 mm (ventilación)","s":"V","d":75,"f":"nudo","i":{}},{"p":[2.1,7.89,-0.4977],"t":"Codo 87,5° PVC 75 mm (ventilación, sube)","s":"V","d":75,"f":"nudo","i":{}},{"p":[2.1,7.89,0.6],"t":"Codo 87,5° PVC 75 mm (cuello de ganso)","s":"V","d":75,"f":"nudo","i":{}},{"p":[2.1,8.03,0.6014],"t":"Codo 87,5° PVC 75 mm (cuello de ganso)","s":"V","d":75,"f":"nudo","i":{}},{"p":[2.1,8.03,0.48],"t":"Malla PVC Ø75 (boca de ventilación)","s":"V","d":75,"f":"salida","i":{"recinto":"Baño poniente"}},{"p":[17.863,8.07,-0.617],"t":"Ramal Y 45° reductor PVC 110×75 (ventilación)","s":"A","d":110,"f":"nudo","i":{}},{"p":[18.063,7.87,-0.6142],"t":"Codo 45° PVC 75 mm (ventilación)","s":"V","d":75,"f":"nudo","i":{}},{"p":[19.763,7.87,-0.5972],"t":"Codo 87,5° PVC 75 mm (ventilación, sube)","s":"V","d":75,"f":"nudo","i":{}},{"p":[19.763,7.87,0.6],"t":"Codo 87,5° PVC 75 mm (cuello de ganso)","s":"V","d":75,"f":"nudo","i":{}},{"p":[19.763,8.01,0.6014],"t":"Codo 87,5° PVC 75 mm (cuello de ganso)","s":"V","d":75,"f":"nudo","i":{}},{"p":[19.763,8.01,0.48],"t":"Malla PVC Ø75 (boca de ventilación)","s":"V","d":75,"f":"salida","i":{"recinto":"Cocina / logia"}},{"p":[6.985,8.0874,-0.6358],"t":"Ramal Y 45° reductor PVC 110×75 (ventilación)","s":"A","d":110,"f":"nudo","i":{}},{"p":[6.785,7.8874,-0.633],"t":"Codo 45° PVC 75 mm (ventilación)","s":"V","d":75,"f":"nudo","i":{}},{"p":[4.085,7.8874,-0.606],"t":"Codo 87,5° PVC 75 mm (ventilación, sube)","s":"V","d":75,"f":"nudo","i":{}},{"p":[4.085,7.8874,0.6],"t":"Codo 87,5° PVC 75 mm (cuello de ganso)","s":"V","d":75,"f":"nudo","i":{}},{"p":[4.085,8.0274,0.6014],"t":"Codo 87,5° PVC 75 mm (cuello de ganso)","s":"V","d":75,"f":"nudo","i":{}},{"p":[4.085,8.0274,0.48],"t":"Malla PVC Ø75 (boca de ventilación)","s":"V","d":75,"f":"salida","i":{"recinto":"Baño sur"}}],"salidas":[{"p":[1.739,7.7334,0.95],"t":"Ducha (monomando con barra) · 0,95 m","rec":"Baño poniente"},{"p":[1.3969,6.195,0.25],"t":"Inodoro · 0,25 m","rec":"Baño poniente"},{"p":[1.3969,5.675,0.5],"t":"Lavamanos · 0,50 m","rec":"Baño poniente"},{"p":[1.3969,4.9175,0.5],"t":"Lavamanos · 0,50 m","rec":"Baño poniente"},{"p":[6.1085,1.0074,0.95],"t":"Ducha (monomando con barra) · 0,95 m","rec":"Baño sur"},{"p":[10.6102,1.252,0.25],"t":"Inodoro · 0,25 m","rec":"Baño sur"},{"p":[7.7055,1.0074,0.5],"t":"Lavamanos · 0,50 m","rec":"Baño sur"},{"p":[18.365,4.6694,0.52],"t":"Lavaplatos · 0,52 m","rec":"Cocina"},{"p":[20.6728,5.9205,0.52],"t":"Lavaplatos · 0,52 m","rec":"Cocina"},{"p":[17.421,4.0874,0.5],"t":"Refrigerador · 0,50 m","rec":"Cocina"},{"p":[17.9268,3.241,0.72],"t":"Lavadora · 0,72 m","rec":"Logia"}],"cajas":[{"t":"Termo eléctrico (referencial 0,45 × 0,70, base a 1,39 m como en Casa Coyhaique 2)","c":[20.95,4.24,1.74],"tam":[0.45,0.45,0.7],"s":"C","forma":"cilindro"},{"t":"Casilla de agua: bomba presurizadora + llave de paso general","c":[19.527,13.6,0.45],"tam":[1.0,1.0,1.0],"s":"F","forma":"caja"},{"t":"Cámara desgrasadora 100 L","c":[17.863,9.231,-0.4421],"tam":[0.6,0.6,0.8842199999999999],"s":"A","forma":"cilindro"},{"t":"Cámara de inspección C.I. 1 (60×60) · fondo a 0,80 m","c":[17.863,10.125,-0.3981],"tam":[0.6,0.6,0.7961000000000001],"s":"A","forma":"caja"},{"t":"Cámara de inspección C.I. 2 (60×60) · fondo a 1,01 m","c":[6.985,10.125,-0.5008],"tam":[0.6,0.6,1.0016600000000033],"s":"A","forma":"caja"},{"t":"Cámara de inspección C.I. 3 (60×60) · fondo a 1,13 m","c":[0.005,10.125,-0.5646],"tam":[0.6,0.6,1.129259999999999],"s":"A","forma":"caja"},{"t":"Cámara de inspección C.I. 4 (60×60) · fondo a 1,27 m","c":[0.005,2.764,-0.6322],"tam":[0.6,0.6,1.2644799999999992],"s":"A","forma":"caja"},{"t":"Fosa séptica 2400 L tricapa · entrada a 1,29 m bajo N.P.T.","c":[0.005,-1.761,-1.632],"tam":[1.24,1.7,1.4],"s":"A","forma":"caja"},{"t":"Cámara repartidora de drenes","c":[0.005,-3.693,-1.432],"tam":[0.6,0.6,0.6],"s":"A","forma":"cilindro"}],"notas":[{"rec":"Baño poniente","sis":"F","ok":true},{"rec":"Baño poniente","sis":"C","ok":true},{"rec":"Baño sur","sis":"F","ok":true},{"rec":"Baño sur","sis":"C","ok":true},{"rec":"Cocina","sis":"F","ok":true},{"rec":"Cocina","sis":"C","ok":true}],"recintos":[],"artefactos":[{"nom":"Ducha (monomando con barra)","rec":"Baño poniente","prims":[{"f":"box","c":[1.739,7.7234,0.95],"s":[0.08,0.02,0.16],"a":0.0,"n":null},{"f":"cil","c":[1.739,7.6934,1.47],"s":[0.025,0.025,0.9],"a":0.0,"n":null},{"f":"ovalo","c":[1.739,7.5734,1.93],"s":[0.22,0.22,0.02],"a":0.0,"n":null},{"f":"box","c":[1.739,7.2334,0.005],"s":[0.9,0.9,0.01],"a":0.0,"n":null}],"info":"Ducha: monomando a 0,95 m con barra y flor (referencial). Pileta de piso sifonada Ø50.","alt":"0,95 m"},{"nom":"Inodoro","rec":"Baño poniente","prims":[{"f":"box","c":[1.5069,6.445,0.62],"s":[0.38,0.18,0.44],"a":90.0,"n":null},{"f":"ovalo","c":[1.7969,6.445,0.2],"s":[0.36,0.52,0.4],"a":90.0,"n":null},{"f":"ovalo","c":[1.8069,6.445,0.42],"s":[0.38,0.5,0.03],"a":90.0,"n":null}],"info":"Inodoro one piece (referencial). Desagüe Ø110 al piso, alimentación con llave angular 1/2\" y flexible.","alt":"0,25 m"},{"nom":"Lavamanos","rec":"Baño poniente","prims":[{"f":"box","c":[1.6369,5.675,0.4],"s":[0.6,0.46,0.8],"a":90.0,"n":null},{"f":"ovalo","c":[1.6369,5.675,0.86],"s":[0.46,0.36,0.12],"a":90.0,"n":null},{"f":"cil","c":[1.4669,5.675,0.92],"s":[0.035,0.035,0.16],"a":90.0,"n":null}],"info":"Lavamanos sobrepuesto sobre mueble (referencial). Desagüe Ø50 con sifón.","alt":"0,50 m"},{"nom":"Lavamanos","rec":"Baño poniente","prims":[{"f":"box","c":[1.6369,4.9175,0.4],"s":[0.6,0.46,0.8],"a":90.0,"n":null},{"f":"ovalo","c":[1.6369,4.9175,0.86],"s":[0.46,0.36,0.12],"a":90.0,"n":null},{"f":"cil","c":[1.4669,4.9175,0.92],"s":[0.035,0.035,0.16],"a":90.0,"n":null}],"info":"Lavamanos sobrepuesto sobre mueble (referencial). Desagüe Ø50 con sifón.","alt":"0,50 m"},{"nom":"Ducha (monomando con barra)","rec":"Baño sur","prims":[{"f":"box","c":[6.1085,1.0174,0.95],"s":[0.08,0.02,0.16],"a":180.0,"n":null},{"f":"cil","c":[6.1085,1.0474,1.47],"s":[0.025,0.025,0.9],"a":180.0,"n":null},{"f":"ovalo","c":[6.1085,1.1674,1.93],"s":[0.22,0.22,0.02],"a":180.0,"n":null},{"f":"box","c":[6.1085,1.5074,0.005],"s":[0.9,0.9,0.01],"a":180.0,"n":null}],"info":"Ducha: monomando a 0,95 m con barra y flor (referencial). Pileta de piso sifonada Ø50.","alt":"0,95 m"},{"nom":"Inodoro","rec":"Baño sur","prims":[{"f":"box","c":[10.5002,1.002,0.62],"s":[0.38,0.18,0.44],"a":-90.0,"n":null},{"f":"ovalo","c":[10.2102,1.002,0.2],"s":[0.36,0.52,0.4],"a":-90.0,"n":null},{"f":"ovalo","c":[10.2002,1.002,0.42],"s":[0.38,0.5,0.03],"a":-90.0,"n":null}],"info":"Inodoro one piece (referencial). Desagüe Ø110 al piso, alimentación con llave angular 1/2\" y flexible.","alt":"0,25 m"},{"nom":"Lavamanos","rec":"Baño sur","prims":[{"f":"box","c":[7.7055,1.2474,0.4],"s":[0.6,0.46,0.8],"a":180.0,"n":null},{"f":"ovalo","c":[7.7055,1.2474,0.86],"s":[0.46,0.36,0.12],"a":180.0,"n":null},{"f":"cil","c":[7.7055,1.0774,0.92],"s":[0.035,0.035,0.16],"a":180.0,"n":null}],"info":"Lavamanos sobrepuesto sobre mueble (referencial). Desagüe Ø50 con sifón.","alt":"0,50 m"},{"nom":"Lavaplatos","rec":"Cocina","prims":[{"f":"box","c":[18.365,4.9694,0.45],"s":[1.2,0.6,0.9],"a":180.0,"n":null},{"f":"box","c":[18.365,4.9494,0.82],"s":[0.5,0.4,0.18],"a":180.0,"n":null}],"info":"Mesón con lavaplatos (referencial). Desagüe Ø50.","alt":"0,52 m"},{"nom":"Lavaplatos","rec":"Cocina","prims":[{"f":"box","c":[20.3728,5.9205,0.45],"s":[1.2,0.6,0.9],"a":-90.0,"n":null},{"f":"box","c":[20.3928,5.9205,0.82],"s":[0.5,0.4,0.18],"a":-90.0,"n":null}],"info":"Mesón con lavaplatos (referencial). Desagüe Ø50.","alt":"0,52 m"},{"nom":"Refrigerador","rec":"Cocina","prims":[{"f":"box","c":[17.421,4.4674,0.9],"s":[0.7,0.7,1.8],"a":180.0,"n":null}],"info":"Refrigerador (referencial). Alimentación de agua fría con llave angular 1/2\".","alt":"0,50 m"},{"nom":"Lavadora","rec":"Logia","prims":[{"f":"box","c":[18.2568,3.241,0.43],"s":[0.6,0.6,0.85],"a":90.0,"n":null}],"info":"Lavadora (referencial). Agua fría y caliente a 0,72 m. Desagüe Ø50 al ras del muro, boca a 0,80 m con sifón.","alt":"0,72 m"}],"ventilacion":{"salidas":3,"diam":75,"ueh":22,"limite":60,"tramos":[{"rec":"Baño poniente","n":"Matriz baño poniente","largo":2.09,"p":[2.1,7.89]},{"rec":"Cocina / logia","n":"Matriz grasas (cocina y logia)","largo":3.44,"p":[19.76,7.87]},{"rec":"Baño sur","n":"Matriz baño sur","largo":4.45,"p":[4.08,7.89]}],"tipo":"fachada","remate":0.6,"largo_max":4.45,"salida":[2.1,7.89]},"profundidad_fosa":1.29,"materiales":[["PPR","Tubería PPR Ø32 mm PN16 agua fría (tira 4 m) — 37.3 m",11,"tiras"],["PPR","Tubería PPR Ø20 mm PN16 agua fría (tira 4 m) — 24.2 m",7,"tiras"],["PPR","Tubería PPR Ø32 mm PN20 agua caliente (tira 4 m) — 26.9 m",8,"tiras"],["PPR","Tubería PPR Ø20 mm PN20 agua caliente (tira 4 m) — 16.1 m",5,"tiras"],["PPR","Codo 90° PPR 20 mm",15,"un."],["PPR","Codo 90° PPR 20 mm (dentro del tabique)",19,"un."],["PPR","Codo 90° PPR 32 mm",6,"un."],["PPR","Codo 90° PPR 32 mm (subida al termo)",2,"un."],["PPR","Codo HI PPR 20-1/2\" (salida)",15,"un."],["PPR","Codo doble fijación PPR 20-1/2\" (salida monomando)",4,"un."],["PPR","Copla reducción PPR 32-20",5,"un."],["PPR","Llave angular HE-HE 1/2\"",15,"un."],["PPR","Llave de bola PPR 32 mm (general)",1,"un."],["PPR","Llave de paso campana PPR 20 mm",6,"un."],["PPR","Llave de paso campana PPR 32 mm (entrada al termo)",1,"un."],["PPR","Tee PPR 20 mm + copla reducción 32-20",5,"un."],["PPR","Tee PPR 32 mm",4,"un."],["PPR","Tee reducida PPR 32-20-32",9,"un."],["PPR","Terminal HE PPR 32-3/4\" (conexión al termo)",2,"un."],["PPR","Coquilla aislante para PPR Ø32 (agua caliente enterrada, tira 2 m) — 25.5 m",15,"tiras"],["PPR","Coquilla aislante para PPR Ø20 (agua caliente enterrada, tira 2 m) — 8.5 m",5,"tiras"],["PPR","Copla PPR (unión de tiras, aprox.)",27,"un."],["PVC sanitario","Tubo PVC sanitario gris Ø110 mm (tira 6 m) — 49.3 m",10,"tiras"],["PVC sanitario","Tubo PVC sanitario gris Ø50 mm (tira 6 m) — 13.9 m",3,"tiras"],["PVC sanitario","Tubo PVC sanitario Ø75 mm ventilación (tira 6 m) — 10.0 m",2,"tiras"],["Drenes","Tubo PVC Ø110 mm perforado para drenes — 7.5 m",2,"tiras"],["PVC sanitario","Codo 45° PVC 110 mm",2,"un."],["PVC sanitario","Codo 45° PVC 110 mm (descarga)",1,"un."],["PVC sanitario","Codo 45° PVC 50 mm",2,"un."],["PVC sanitario","Codo 45° PVC 50 mm (descarga)",1,"un."],["PVC sanitario","Codo 45° PVC 75 mm (ventilación)",3,"un."],["PVC sanitario","Codo 87,5° PVC 110 mm (descarga)",1,"un."],["PVC sanitario","Codo 87,5° PVC 50 mm (descarga)",7,"un."],["PVC sanitario","Codo 87,5° PVC 50 mm (salida del sifón al muro, 0,45 m)",3,"un."],["PVC sanitario","Codo 87,5° PVC 75 mm (cuello de ganso)",6,"un."],["PVC sanitario","Codo 87,5° PVC 75 mm (ventilación, sube)",3,"un."],["PVC sanitario","Malla PVC Ø75 (boca de ventilación)",3,"un."],["PVC sanitario","Pileta de piso sifonada Ø50 (ducha)",2,"un."],["PVC sanitario","Ramal Y 45° PVC 110×110",2,"un."],["PVC sanitario","Ramal Y 45° reductor PVC 110×50",8,"un."],["PVC sanitario","Ramal Y 45° reductor PVC 110×75 (ventilación)",2,"un."],["PVC sanitario","Reducción PVC 110×75 (cabeza de matriz, sigue la ventilación)",1,"un."],["PVC sanitario","Tapón PVC 110 mm (cabeza de matriz)",2,"un."],["Obras","Cámara de inspección 60×60",4,"un."],["Obras","Cámara desgrasadora 100 L",1,"un."],["Obras","Fosa séptica 2400 L tricapa + kit",1,"un."],["Obras","Cámara repartidora de drenes",1,"un."],["Varios","Adhesivo PVC (Vinilit tradicional 240 cc)",2,"un."],["Varios","Teflón 1/2\"",2,"un."]],"perfiles":[{"n":"Matriz grasas (cocina y logia)","largo":6.46,"z_ini":0.45,"z_fin":0.58},{"n":"Matriz baño sur","largo":8.28,"z_ini":0.45,"z_fin":0.62},{"n":"Matriz baño poniente","largo":5.02,"z_ini":0.45,"z_fin":0.55},{"n":"Colector C.I.1 → C.I.2","largo":10.28,"z_ini":0.75,"z_fin":0.96},{"n":"Colector C.I.2 → C.I.3","largo":6.38,"z_ini":0.96,"z_fin":1.08},{"n":"Colector C.I.3 → C.I.4","largo":6.76,"z_ini":1.08,"z_fin":1.22},{"n":"C.I.4 → fosa séptica","largo":3.38,"z_ini":1.22,"z_fin":1.29}],"puentes":[],"extension":[1.3029,-2.4566,24.5668,8.8274],"obra":"nires","nombre_obra":"Casa Los Ñires","notas_obra":["Matriz del baño sur: el inodoro, la ducha y el lavamanos quedan muy juntos y sus ramales Y salen a menos de 28 cm entre sí. Revisar en obra o separar los ramales.","Baño poniente: hay dos lavamanos (salidas a 0,50 en el mismo muro). Confirmar.","Cocina: además del lavaplatos hay una segunda salida con fría y caliente al oriente (se modeló como segundo lavaplatos, su desagüe sigue la diagonal de la planta). Confirmar qué artefacto es.","Salida de fría sola en la cocina (x 1154,4): se modeló como refrigerador a 0,50. Confirmar.","Lavadora (logia): desagüe de piso según la planta; en Nueva Coyhaique se usó boca al muro a 0,80 con sifón. Confirmar.","Termo: ubicado de referencia junto a sus conexiones (falta capacidad y altura).","Mismo criterio que Nueva Coyhaique: agua enterrada bajo el radier (fría −0,30 PN16, caliente −0,36 PN20 con coquilla), alcantarillado 2 %, ventilación por fachada con cuello de ganso."],"validacion":{"uniones":177,"problemas":[],"avisos":[],"rutas":[{"red":"fría","tee_corrida":0.044},{"red":"fría","tee_corrida":0.041},{"red":"fría","tee_corrida":0.064},{"red":"fría","tee_corrida":0.04},{"red":"fría","tee_corrida":0.175},{"red":"fría","tee_corrida":0.022},{"red":"fría","tee_corrida":0.0},{"red":"fría","tee_corrida":0.097},{"red":"caliente","tee_corrida":0.044},{"red":"caliente","tee_corrida":0.041},{"red":"caliente","tee_corrida":0.064},{"red":"caliente","tee_corrida":0.04},{"red":"caliente","tee_corrida":0.175},{"red":"caliente","tee_corrida":0.022},{"red":"caliente","tee_corrida":0.13}],"optimizacion":[{"red":"fría","salida":"LAVADORA","rec":"Logia","tipo":"tee corrida","codos_antes":3,"codos_despues":0,"clave":"F17"},{"red":"caliente","salida":"DUCHA","rec":"Baño poniente","tipo":"en L","codos_antes":2,"codos_despues":1,"clave":"C1"},{"red":"caliente","salida":"LP","rec":"Cocina","tipo":"en L","codos_antes":2,"codos_despues":1,"clave":"C13"}]}};
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const SIS = {F:{n:'Agua fría',v:'--fria'}, C:{n:'Agua caliente',v:'--caliente'}, A:{n:'Alcantarillado',v:'--alc'},
+             V:{n:'Ventilación',v:'--vent'}, D:{n:'Drenes',v:'--dren'}};
+const num = (x,d=2)=> (Math.round(x*10**d)/10**d).toFixed(d).replace('.',',');
+
+// ---------- escena ----------
+const canvas = document.getElementById('lienzo');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.02, 400);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.12;
+controls.enableZoom = false; controls.minDistance = 0.03; controls.maxDistance = 120;
+controls.screenSpacePanning = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8f8c, 0.95));
+const sol = new THREE.DirectionalLight(0xffffff, 0.55); sol.position.set(-8, 20, 12); scene.add(sol);
+const P = a => new THREE.Vector3(a[0], a[2], -a[1]);          // [x,y,z] planta -> three (y arriba)
+const grupos = {}; ['muros','piso','artefactos','F','C','A','V','D','rotulos','cajas'].forEach(k=>{grupos[k]=new THREE.Group(); scene.add(grupos[k]);});
+const pick = [];
+let grosor = 1;
+
+function colorSis(s){ return new THREE.Color(css(SIS[s].v)); }
+function mat(c, op=1){ return new THREE.MeshStandardMaterial({color:c, roughness:.55, metalness:.05, transparent:op<1, opacity:op}); }
+
+// muros
+const matMuro = new THREE.MeshStandardMaterial({color:0xd5dad7, transparent:true, opacity:.30, depthWrite:false, side:THREE.DoubleSide});
+const matBorde = new THREE.LineBasicMaterial({color:0x5f6764, transparent:true, opacity:.6});
+D.muros.forEach(poly=>{
+  const sh = new THREE.Shape(poly.map(p=>new THREE.Vector2(p[0], p[1])));
+  const g = new THREE.ExtrudeGeometry(sh, {depth:2.40, bevelEnabled:false});
+  g.rotateX(-Math.PI/2);
+  const m = new THREE.Mesh(g, matMuro); grupos.muros.add(m);
+  grupos.muros.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 30), matBorde));
+});
+// piso
+const [x0,y0,x1,y1] = D.extension;
+{
+  const w=x1-x0+1, h=y1-y0+1;
+  const g = new THREE.PlaneGeometry(w, h); g.rotateX(-Math.PI/2);
+  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({color:0xb7bdb9, transparent:true, opacity:.16, depthWrite:false, side:THREE.DoubleSide}));
+  m.position.set((x0+x1)/2, 0, -(y0+y1)/2); grupos.piso.add(m);
+  const grid = new THREE.GridHelper(Math.max(w,h)+2, Math.round(Math.max(w,h)+2), 0x8b928e, 0xb7bdb9);
+  grid.material.transparent = true; grid.material.opacity = .25; grid.position.set((x0+x1)/2, 0.001, -(y0+y1)/2);
+  grupos.piso.add(grid);
+}
+// tubos
+const tuboMeshes = [];
+function cilindro(a, b, r, material){
+  const A=P(a), B=P(b), L=A.distanceTo(B); if (L<1e-4) return null;
+  const g = new THREE.CylinderGeometry(r, r, L, 18, 1, false);
+  const m = new THREE.Mesh(g, material);
+  m.position.copy(A).add(B).multiplyScalar(.5);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), B.clone().sub(A).normalize());
+  return m;
+}
+const mats = {}; Object.keys(SIS).forEach(s=>mats[s]=mat(colorSis(s)));
+D.tubos.forEach(t=>{
+  for (let i=0;i<t.p.length-1;i++){
+    const m = cilindro(t.p[i], t.p[i+1], t.d/2000, mats[t.s]);
+    if (!m) continue;
+    m.userData = {tipo:'tubo', t}; m.userData.r = t.d/2000;
+    grupos[t.s].add(m); pick.push(m); tuboMeshes.push(m);
+  }
+});
+// piezas: desarrollo real de cada unión. Cada boca (campana) tiene el largo y el diámetro exterior
+// de una pieza comercial; en PPR se dibuja el cordón de termofusión, en PVC el borde de la campana.
+const matLlave = mat(new THREE.Color(0xc0392b));
+const matCromo = new THREE.MeshStandardMaterial({color:0xe3e7ea, roughness:.22, metalness:.35});
+const matBronce = new THREE.MeshStandardMaterial({color:0xd4ad45, roughness:.3, metalness:.4});
+const matOscuro = new THREE.MeshStandardMaterial({color:0x4f5659, roughness:.6});
+const clave = v => [Math.round(v.x*250), Math.round(v.y*250), Math.round(v.z*250)].join(',');
+const nudos = new Map();
+D.tubos.forEach(t=>{ for (let i=0;i<t.p.length-1;i++){
+  const a=P(t.p[i]), b=P(t.p[i+1]); if (a.distanceTo(b)<1e-4) continue;
+  [[a,b],[b,a]].forEach(([u,v])=>{ const k=clave(u); if(!nudos.has(k)) nudos.set(k,{p:u.clone(), dirs:[], s:t.s});
+    const n=nudos.get(k); const d=v.clone().sub(u).normalize();
+    if (!n.dirs.some(o=>o.d.dot(d)>0.995)) n.dirs.push({d, r:t.d/2000}); });
+}});
+const matFit = {}; Object.keys(SIS).forEach(k=>{ const c = colorSis(k).clone().lerp(new THREE.Color(0xffffff), .22); matFit[k] = mat(c); });
+const matCord = {}; Object.keys(SIS).forEach(k=>{ matCord[k] = mat(colorSis(k).clone().multiplyScalar(.82)); });
+const cuerpos = [];
+const Y = new THREE.Vector3(0,1,0);
+const esPPR = s => s==='F' || s==='C';
+// medidas de pieza comercial a partir del radio del caño
+function dimFit(s, r){
+  return esPPR(s) ? {rf: r*1.42, L: r*2.2 + 0.004}          // Ø20: Øext 28 mm, boca 26 mm · Ø32: Øext 45 mm, boca 39 mm
+                  : {rf: r*1.13, L: r*1.1 + 0.012};          // Ø110: Øext 124 mm, campana 72 mm · Ø50: 56 / 40 mm
+}
+function cil(a, b, r, m, seg=24){ // cilindro de a hasta b (coordenadas locales)
+  const L = a.distanceTo(b); const me = new THREE.Mesh(new THREE.CylinderGeometry(r, r, L, seg), m);
+  me.position.copy(a).add(b).multiplyScalar(.5); me.quaternion.setFromUnitVectors(Y, b.clone().sub(a).normalize()); return me; }
+function cono(a, b, ra, rb, m){
+  const L = a.distanceTo(b); const me = new THREE.Mesh(new THREE.CylinderGeometry(rb, ra, L, 24), m);
+  me.position.copy(a).add(b).multiplyScalar(.5); me.quaternion.setFromUnitVectors(Y, b.clone().sub(a).normalize()); return me; }
+function anillo(c, d, r, t, m){
+  const me = new THREE.Mesh(new THREE.TorusGeometry(r, t, 10, 28), m);
+  me.position.copy(c); me.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1), d); return me; }
+function boca(g, s, d, r, Lmin, desde=0){ // una campana de la pieza en dirección d
+  const {rf, L} = dimFit(s, r); const Lr = Math.max(L, Lmin||0);
+  g.add(cil(d.clone().multiplyScalar(desde), d.clone().multiplyScalar(Lr), rf, matFit[s]));
+  const fin = d.clone().multiplyScalar(Lr);
+  if (esPPR(s)) g.add(anillo(fin.clone().add(d.clone().multiplyScalar(0.0015)), d, r*1.04, r*0.17, matCord[s]));   // cordón de termofusión
+  else g.add(anillo(fin, d, rf, rf*0.07, matFit[s]));                                                               // borde de campana
+  return Lr;
+}
+function ejeEn(pt){ // dirección del caño que pasa por un punto (para llaves en línea)
+  let mejor = null, dm = 0.02;
+  D.tubos.forEach(t=>{ for (let i=0;i<t.p.length-1;i++){ const a=P(t.p[i]), b=P(t.p[i+1]); const ab=b.clone().sub(a); const L=ab.length(); if (L<1e-4) continue;
+    const u = Math.max(0, Math.min(1, pt.clone().sub(a).dot(ab)/(L*L))); const d = a.clone().add(ab.clone().multiplyScalar(u)).distanceTo(pt);
+    if (d < dm){ dm = d; mejor = {d: ab.normalize(), r: t.d/2000}; } }});
+  return mejor || {d: Y.clone(), r: 0.01};
+}
+function marco(d){ // ejes locales: d hacia afuera, arriba, lado
+  const up = Math.abs(d.y) > .9 ? new THREE.Vector3(1,0,0) : Y.clone();
+  const lado = new THREE.Vector3().crossVectors(up, d).normalize(); const arriba = new THREE.Vector3().crossVectors(d, lado).normalize();
+  return {lado, arriba};
+}
+function cuerpoNudo(n, p){
+  const g = new THREE.Group(), s = n.s, dirs = n.dirs;
+  const t = p.t;
+  if (p.f==='salida' && esPPR(s) && /Terminal HE/.test(t)){
+    const abajo = dirs[0] || {d: Y.clone().negate(), r: 0.016}; const r = abajo.r, {rf} = dimFit(s, r);
+    boca(g, s, abajo.d, r);
+    g.add(cil(new THREE.Vector3(), new THREE.Vector3(0,0.012,0), rf, matFit[s]));
+    g.add(cil(new THREE.Vector3(0,0.012,0), new THREE.Vector3(0,0.026,0), rf*0.95, matBronce, 6));
+    g.add(cil(new THREE.Vector3(0,0.026,0), new THREE.Vector3(0,0.045,0), 0.0125, matBronce, 20));
+    return g;
+  }
+  if (p.f==='salida' && esPPR(s)){
+    // codo con inserto metálico de hilo interior: boca hacia el caño que sube y salida roscada hacia la cara del muro
+    const abajo = dirs.find(o=>Math.abs(o.d.y)>.7) || dirs[0];
+    const afuera = (dirs.find(o=>o!==abajo) || {d: p.dir ? new THREE.Vector3(p.dir[0],0,-p.dir[1]) : new THREE.Vector3(1,0,0)}).d;
+    const r = abajo.r, {rf} = dimFit(s, r);
+    boca(g, s, abajo.d, r);
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(rf, 20, 14), matFit[s]));
+    g.add(cil(new THREE.Vector3(), afuera.clone().multiplyScalar(0.030), rf, matFit[s]));
+    g.add(cil(afuera.clone().multiplyScalar(0.030), afuera.clone().multiplyScalar(0.045), rf*0.98, matBronce, 6));   // hexágono de bronce 1/2"
+    g.add(anillo(afuera.clone().multiplyScalar(0.0452), afuera, 0.0085, 0.0018, matBronce));                       // boca roscada
+    if (/doble fijación/.test(t)){
+      const {lado, arriba} = marco(afuera);
+      const placa = new THREE.Mesh(new THREE.BoxGeometry(0.085, 0.032, 0.004), matFit[s]);
+      placa.position.copy(afuera.clone().multiplyScalar(0.022));
+      placa.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(lado, arriba, afuera));
+      g.add(placa);
+      [-1,1].forEach(k=>{ const h = cil(afuera.clone().multiplyScalar(0.020).add(lado.clone().multiplyScalar(k*0.033)),
+                                      afuera.clone().multiplyScalar(0.0245).add(lado.clone().multiplyScalar(k*0.033)), 0.0035, matOscuro, 12); g.add(h); });
+    }
+    return g;
+  }
+  if (p.f==='salida' && /Malla/.test(t)){ // boca de la ventilación mirando hacia abajo, con malla
+    const arriba = dirs[0] || {d: Y.clone(), r: 0.0375}; const r = arriba.r, {rf} = dimFit(s, r);
+    boca(g, s, arriba.d, r);
+    const fuera = arriba.d.clone().negate();
+    g.add(cil(new THREE.Vector3(), fuera.clone().multiplyScalar(0.012), rf, matFit[s]));
+    g.add(cil(fuera.clone().multiplyScalar(0.012), fuera.clone().multiplyScalar(0.016), rf*0.92, matOscuro, 24));
+    return g;
+  }
+  if (p.f==='salida' && /Sifón PVC/.test(t)){ // boca de descarga de lavadora / secadora al ras del muro
+    const abajo = dirs[0] || {d: Y.clone().negate(), r: 0.025}; const r = abajo.r, {rf} = dimFit(s, r);
+    boca(g, s, abajo.d, r);
+    g.add(cil(new THREE.Vector3(), new THREE.Vector3(0,0.05,0), rf*1.25, matFit[s]));
+    g.add(anillo(new THREE.Vector3(0,0.05,0), Y, rf*1.15, 0.004, matFit[s]));
+    return g;
+  }
+  if (p.f==='salida'){ // sombrerete de ventilación
+    const abajo = dirs[0] || {d: Y.clone().negate(), r: 0.0375}; const r = abajo.r;
+    boca(g, s, abajo.d, r);
+    g.add(cil(new THREE.Vector3(0,0.01,0), new THREE.Vector3(0,0.05,0), r*1.6, matFit[s]));
+    g.add(cono(new THREE.Vector3(0,0.05,0), new THREE.Vector3(0,0.10,0), r*2.1, 0.004, matFit[s]));
+    return g;
+  }
+  if (dirs.length === 1){ boca(g, s, dirs[0].d, dirs[0].r); g.add(new THREE.Mesh(new THREE.CircleGeometry(dimFit(s,dirs[0].r).rf, 24), matFit[s])); return g; }
+  // par principal (el más opuesto) = "corrida"; los demás = derivaciones
+  let ia=0, ib=1, best=2;
+  for (let i=0;i<dirs.length;i++) for (let j=i+1;j<dirs.length;j++){ const v = dirs[i].d.dot(dirs[j].d); if (v<best){ best=v; ia=i; ib=j; } }
+  const opuestos = best < (dirs.length>2 ? -0.93 : -0.98);
+  const rfMax = Math.max(...dirs.map(o=>dimFit(s,o.r).rf));
+  if (dirs.length===2 && opuestos && Math.abs(dirs[0].r-dirs[1].r) > 1e-4){
+    // copla de reducción: campana grande, cono y campana chica
+    const [gr, ch] = dirs[0].r > dirs[1].r ? dirs : [dirs[1], dirs[0]];
+    const Lg = boca(g, s, gr.d, gr.r); const Lc = boca(g, s, ch.d, ch.r, 0, 0.012);
+    g.add(cono(new THREE.Vector3(), ch.d.clone().multiplyScalar(0.012), dimFit(s,gr.r).rf, dimFit(s,ch.r).rf, matFit[s]));
+    return g;
+  }
+  const rCorr = opuestos && dirs.length>2 ? Math.max(dimFit(s,dirs[ia].r).rf, dimFit(s,dirs[ib].r).rf) : rfMax;
+  dirs.forEach((o,i)=>{
+    const deriv = opuestos && i!==ia && i!==ib;
+    boca(g, s, o.d, o.r, deriv ? rCorr + dimFit(s,o.r).L*0.75 : 0);
+  });
+  if (!opuestos || dirs.length>2) g.add(new THREE.Mesh(new THREE.SphereGeometry(dirs.length>2 && opuestos ? rCorr : rfMax, 22, 16), matFit[s]));
+  return g;
+}
+function nudoCerca(c, s){ // pieza que no cae justo en el extremo de un caño (ramal sobre una matriz que sigue de largo)
+  const dirs = [];
+  const agregar = (d, r)=>{ if (!dirs.some(o=>o.d.dot(d)>0.995)) dirs.push({d, r}); };
+  D.tubos.forEach(t=>{ if (t.s!==s) return; for (let i=0;i<t.p.length-1;i++){
+    const a=P(t.p[i]), b=P(t.p[i+1]), ab=b.clone().sub(a), L=ab.length(); if (L<1e-4) continue;
+    const u = c.clone().sub(a).dot(ab)/(L*L), q = a.clone().add(ab.clone().multiplyScalar(Math.max(0,Math.min(1,u)))), dist = q.distanceTo(c), r = t.d/2000;
+    if (u>0.02 && u<0.98 && dist<0.01){ agregar(ab.clone().normalize(), r); agregar(ab.clone().normalize().negate(), r); }
+    else if (dist<0.03 && (u<=0.02 || u>=0.98)){ const lejos = u>=0.98 ? a : b; agregar(lejos.clone().sub(c).normalize(), r); }
+  }});
+  return dirs.length ? {p:c, dirs, s} : null;
+}
+function unirNudo(n, nc, c, s){ // junta los caños que terminan en el punto con los que pasan de largo (ramal sobre matriz)
+  if (!n) return nc; if (!nc) return n;
+  const dirs = n.dirs.slice(); nc.dirs.forEach(o=>{ if (!dirs.some(q=>q.d.dot(o.d)>0.995)) dirs.push(o); });
+  return {p:n.p, s:n.s, dirs};
+}
+function llave(p){
+  const g = new THREE.Group(), c = P(p.p), {d: eje, r} = ejeEn(c), s = p.s, {rf} = dimFit(s, r);
+  [eje, eje.clone().negate()].forEach(d=> boca(g, s, d, r));
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(rf*1.35, 22, 16), matFit[s]));
+  let sal = p.dir ? new THREE.Vector3(p.dir[0], 0, -p.dir[1]).normalize() : (Math.abs(eje.y)>.7 ? new THREE.Vector3(1,0,0) : Y.clone());
+  if (/bola/.test(p.t)){
+    g.add(cil(new THREE.Vector3(), sal.clone().multiplyScalar(rf*2.0), rf*0.5, matCromo, 16));
+    const {lado} = marco(sal);
+    const palanca = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.008, 0.022), matLlave);
+    palanca.position.copy(sal.clone().multiplyScalar(rf*2.1)).add(eje.clone().multiplyScalar(0.05));
+    palanca.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(eje, sal, new THREE.Vector3().crossVectors(eje, sal)));
+    g.add(palanca);
+  } else {
+    // llave de paso empotrada: campana (bonete) que atraviesa el revestimiento, roseta en la cara del muro y manilla
+    g.add(cil(new THREE.Vector3(), sal.clone().multiplyScalar(0.040), rf*0.75, matFit[s]));
+    g.add(cil(sal.clone().multiplyScalar(0.040), sal.clone().multiplyScalar(0.058), 0.010, matCromo, 18));
+    g.add(cil(sal.clone().multiplyScalar(0.045), sal.clone().multiplyScalar(0.049), 0.030, matCromo, 28));      // roseta
+    g.add(cil(sal.clone().multiplyScalar(0.058), sal.clone().multiplyScalar(0.074), 0.019, matLlave, 6));        // manilla
+  }
+  g.position.copy(c); return g;
+}
+function registrar(g, p){
+  g.userData = {tipo:'pieza', p};
+  g.traverse(c=>{ if (c.isMesh){ c.userData = {tipo:'pieza', p, grupo:g}; pick.push(c); } });
+  grupos[p.s].add(g); cuerpos.push(g); p._cuerpo = g;
+}
+D.piezas.forEach(p=>{
+  const c = P(p.p); let n = nudos.get(clave(c));
+  let g = null;
+  if (p.f==='llave') g = llave(p);
+  else if (p.f==='angular'){
+    const r = 0.011; g = new THREE.Group();
+    const d = p.dir ? new THREE.Vector3(p.dir[0], 0, -p.dir[1]) : new THREE.Vector3(1,0,0);
+    g.add(cil(new THREE.Vector3(), d.clone().multiplyScalar(-0.035), r*0.85, matCromo, 18));                        // niple HE al codo HI
+    g.add(cil(d.clone().multiplyScalar(-0.033), d.clone().multiplyScalar(-0.029), 0.026, matCromo, 28));             // roseta
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(r*1.25, 18, 14), matCromo));
+    g.add(cil(new THREE.Vector3(), new THREE.Vector3(0,-0.045,0), r*0.65, matCromo, 14));                            // salida HE al flexible
+    g.add(cil(new THREE.Vector3(), d.clone().multiplyScalar(0.022), 0.004, matCromo, 10));
+    g.add(cil(d.clone().multiplyScalar(0.022), d.clone().multiplyScalar(0.032), 0.015, matCromo, 20));               // perilla
+    g.position.copy(c);
+  } else if (p.f==='pileta'){
+    g = new THREE.Group();
+    g.add(cil(new THREE.Vector3(0,-0.11,0), new THREE.Vector3(0,-0.005,0), 0.06, matFit[p.s] || matFit.A, 28));       // cuerpo sifonado
+    g.add(new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.010, 0.15), matCromo));
+    for (let i=-2;i<=2;i++){ const b = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.012, 0.008), matOscuro); b.position.set(0, 0.002, i*0.022); g.add(b); }
+    g.position.copy(c);
+  } else if ((n = unirNudo(n, nudoCerca(c, p.s), c, p.s))){ g = cuerpoNudo(n, p); g.position.copy(c); }
+  else { const r = Math.max(p.d/2000*1.4, 0.012); g = new THREE.Group(); g.add(new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), matFit[p.s] || matFit.F)); g.position.copy(c); }
+  registrar(g, p);
+});
+// artefactos en volumen blanco transparente con aristas azules (como en un modelo BIM)
+const matArt = new THREE.MeshStandardMaterial({color:0xffffff, transparent:true, opacity:.45, roughness:.4, depthWrite:false});
+const matArtBorde = new THREE.LineBasicMaterial({color:0x4f86c6, transparent:true, opacity:.85});
+(D.artefactos||[]).forEach(a=>{
+  const g = new THREE.Group();
+  a.prims.forEach(q=>{
+    let geo;
+    if (q.f==='box') geo = new THREE.BoxGeometry(q.s[0], q.s[2], q.s[1]);
+    else if (q.f==='cil') { geo = new THREE.CylinderGeometry(0.5, 0.5, 1, 20); }
+    else { geo = new THREE.CylinderGeometry(0.5, 0.5, 1, 32); }
+    const me = new THREE.Mesh(geo, matArt);
+    if (q.f!=='box') me.scale.set(q.s[0], q.s[2], q.s[1]);
+    me.position.copy(P(q.c)); me.rotation.y = q.a*Math.PI/180;
+    const ed = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), matArtBorde);
+    ed.position.copy(me.position); ed.rotation.copy(me.rotation); ed.scale.copy(me.scale);
+    me.userData = {tipo:'artefacto', a}; pick.push(me); g.add(me); g.add(ed);
+  });
+  grupos.artefactos.add(g);
+});
+// cajas (camaras, fosa, termo, casilla)
+D.cajas.forEach(c=>{
+  const [a,b,h] = c.tam;
+  const g = c.forma==='cilindro' ? new THREE.CylinderGeometry(a/2, a/2, Math.abs(h), 24) : new THREE.BoxGeometry(a, Math.abs(h), b);
+  const m = new THREE.Mesh(g, mat(colorSis(c.s), .35)); m.position.copy(P(c.c));
+  m.userData = {tipo:'caja', c}; grupos.cajas.add(m); pick.push(m);
+  const ed = new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({color:colorSis(c.s)}));
+  ed.position.copy(m.position); grupos.cajas.add(ed);
+});
+// rótulos de salidas
+function rotulo(txt, pos){
+  const dpr = 2, fs = 26*dpr, pad = 10*dpr;
+  const cv = document.createElement('canvas'); const cx = cv.getContext('2d');
+  cx.font = `500 ${fs}px IBM Plex Sans, sans-serif`;
+  const w = cx.measureText(txt).width + pad*2, h = fs + pad*1.4;
+  cv.width = w; cv.height = h;
+  cx.font = `500 ${fs}px IBM Plex Sans, sans-serif`;
+  cx.fillStyle = 'rgba(255,255,255,.92)'; cx.strokeStyle = 'rgba(40,60,55,.55)'; cx.lineWidth = 2*dpr;
+  cx.beginPath(); cx.roundRect ? cx.roundRect(1,1,w-2,h-2,8*dpr) : cx.rect(1,1,w-2,h-2); cx.fill(); cx.stroke();
+  cx.fillStyle = '#1d2321'; cx.textBaseline = 'middle'; cx.fillText(txt, pad, h/2+1);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv), depthTest:false}));
+  const k = 0.0052; sp.scale.set(w*k/dpr*0.5, h*k/dpr*0.5, 1);
+  sp.position.copy(P(pos)); sp.renderOrder = 10; grupos.rotulos.add(sp);
+}
+D.salidas.forEach(s=> rotulo(s.t, [s.p[0], s.p[1], s.p[2]+0.16]));
+D.cajas.filter(c=>/Cámara de inspección|Fosa/.test(c.t)).forEach(c=> rotulo(c.t.split(' · ')[1] ? c.t.split(' · ')[0].replace('Cámara de inspección ','') + ' · ' + c.t.split(' · ')[1] : c.t, [c.c[0], c.c[1], 0.35]));
+
+// ---------- cámara y vistas ----------
+const cajaDe = pts => { const b = new THREE.Box3(); pts.forEach(p=>b.expandByPoint(P(p))); return b; };
+if (D.nombre_obra){ document.querySelector('h1').textContent = 'Gasfitería 3D · ' + D.nombre_obra; document.title = 'Gasfitería 3D ' + D.nombre_obra.replace(/^Casa /, ''); }
+const VISTAS = [['General', null]];
+const recs = {}; D.salidas.forEach(s=>{(recs[s.rec] ||= []).push(s.p);});
+Object.entries(recs).forEach(([r,pts])=>VISTAS.push([r, pts]));
+VISTAS.push(['Cámaras y fosa', D.cajas.filter(c=>c.s==='A').map(c=>c.c)]);
+function enfocar(pts){
+  let b;
+  if (!pts) { b = new THREE.Box3(new THREE.Vector3(x0,-1.4,-y1-4), new THREE.Vector3(x1,2.5,-y0)); }
+  else { b = cajaDe(pts); b.expandByScalar(1.2); b.min.y = Math.min(b.min.y, -0.9); }
+  const c = b.getCenter(new THREE.Vector3()), s = b.getSize(new THREE.Vector3()).length();
+  controls.target.copy(c);
+  camera.position.copy(c).add(new THREE.Vector3(s*.55, s*.55, s*.62));
+  camera.near = 0.005; camera.updateProjectionMatrix(); controls.update();
+}
+const barra = document.getElementById('barra');
+VISTAS.forEach(([n,pts])=>{ const b=document.createElement('button'); b.type='button'; b.textContent=n; b.onclick=()=>enfocar(pts); barra.appendChild(b); });
+const bMed = document.createElement('button'); bMed.type='button'; bMed.textContent='Medir'; bMed.setAttribute('aria-pressed','false'); barra.appendChild(bMed);
+const bGr = document.createElement('button'); bGr.type='button'; bGr.textContent='Caños ×3'; bGr.setAttribute('aria-pressed','false'); barra.appendChild(bGr);
+bGr.onclick=()=>{ grosor = grosor===1?3:1; bGr.setAttribute('aria-pressed', grosor===3);
+  tuboMeshes.forEach(m=>{ m.scale.set(grosor,1,grosor); }); cuerpos.forEach(g=>g.scale.setScalar(grosor)); };
+
+// capas
+const capas = document.getElementById('capas');
+[['muros','Muros',null],['piso','Piso',null],['artefactos','Artefactos',null],['F','Agua fría','--fria'],['C','Agua caliente','--caliente'],['A','Alcantarillado','--alc'],
+ ['V','Ventilación','--vent'],['D','Drenes','--dren'],['cajas','Cámaras y equipos',null],['rotulos','Alturas',null]].forEach(([k,n,v])=>{
+  const l=document.createElement('label'); const i=document.createElement('input'); i.type='checkbox'; i.checked=true; i.id='capa-'+k;
+  i.onchange=()=>{ grupos[k].visible=i.checked; }; l.appendChild(i);
+  if (v){ const s=document.createElement('span'); s.className='sw'; s.style.background=css(v); l.appendChild(s); }
+  l.appendChild(document.createTextNode(n)); capas.appendChild(l);
+});
+
+// ---------- selección e info ----------
+const info = document.getElementById('info'), medida = document.getElementById('medida');
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+let puntos = [], lineaMed = null;
+const previos = new Map();
+const matAcento = () => { const m = mat(new THREE.Color(css('--accent'))); m.transparent = true; m.opacity = 1; return m; };
+function limpiar(){ previos.forEach((m,o)=>{ o.material = m; }); previos.clear(); }
+function resaltar(objs){ limpiar(); const ma = matAcento();
+  objs.forEach(o=> o.traverse(x=>{ if (x.isMesh && !previos.has(x)){ previos.set(x, x.material); x.material = ma; } })); }
+function objetosDe(ud, obj){ return [ud.grupo || (obj && obj.parent && obj.parent.userData.tipo==='artefacto' ? obj.parent : obj)].filter(Boolean); }
+const FICHAS = [
+ [/Tubería PPR Ø(\d+) mm PN16/, m=>[['Material','Polipropileno random (PPR), PN16 (16 bar de presión nominal), solo agua fría'],
+   ['Espesor de pared', m[1]==='32' ? '4,4 mm (SDR 7,4)' : '2,8 mm (SDR 7,4)'], ['Unión','Termofusión (sin pegamento ni rosca)'], ['Tira','4 m']]],
+ [/Tubería PPR Ø(\d+) mm PN20 \(agua caliente/, m=>[['Material','Polipropileno random (PPR), PN20 (20 bar de presión nominal)'],
+   ['Espesor de pared', m[1]==='32' ? '5,4 mm (SDR 6)' : '3,4 mm (SDR 6)'], ['Aislación','Coquilla aislante en todo el tramo enterrado'], ['Unión','Termofusión (sin pegamento ni rosca)'], ['Tira','4 m']]],
+ [/Tubería PPR Ø(\d+)/, m=>[['Material','Polipropileno random (PPR), PN20 (20 bar de presión nominal)'],
+   ['Espesor de pared', m[1]==='32' ? '5,4 mm (SDR 6)' : '3,4 mm (SDR 6)'], ['Unión','Termofusión (sin pegamento ni rosca)'], ['Tira','4 m']]],
+ [/Tee reducida PPR 32-20-32/, ()=>[['Qué hace','La troncal Ø32 sigue de largo y deriva una llegada Ø20 a un artefacto'],['Unión','Termofusión']]],
+ [/Tee PPR/, ()=>[['Qué hace','Divide la red en dos tramos'],['Unión','Termofusión']]],
+ [/Codo 90° PPR|Codo 45° PPR/, ()=>[['Qué hace','Cambia la dirección del caño'],['Unión','Termofusión']]],
+ [/dentro del tabique/, ()=>[['Dónde va','Al pie del muro: el caño que viene bajo el piso sube por dentro del tabique']]],
+ [/Codo HI PPR 20-1\/2/, ()=>[['Qué es','Codo PPR con inserto metálico de hilo interior 1/2" (rosca hembra)'],['Para qué','Ahí se atornilla la llave angular del artefacto']]],
+ [/Codo doble fijación/, ()=>[['Qué es','Codo con inserto de hilo interior 1/2" y orejas para atornillarlo a la estructura'],['Para qué','Salida firme para el monomando de la ducha']]],
+ [/Llave angular/, ()=>[['Qué es','Llave de corte del artefacto, rosca exterior 1/2" en ambos lados'],['Para qué','Corta el agua de un solo artefacto; de ahí sale el flexible']]],
+ [/Llave de paso campana/, ()=>[['Qué es','Llave de paso PPR para termofusión'],['Para qué','Corta el agua de todo el recinto']]],
+ [/Llave de bola PPR 32/, ()=>[['Qué es','Llave general de la casa, a la salida de la bomba']]],
+ [/Copla reducción PPR 32-20/, ()=>[['Qué hace','Pasa de Ø32 a Ø20 en línea recta']]],
+ [/Tubo PVC|Matriz PVC|Colector PVC|Ramal PVC|Descarga PVC|PVC Ø110 mm/, ()=>[['Material','PVC sanitario gris (NCh 1779)'],['Unión','Cementada con adhesivo para PVC'],['Tira','6 m']]],
+ [/Ventilación/, ()=>[['Material','PVC sanitario Ø75'],['Recorrido','Sale de la matriz junto a la fachada y sube adosada al muro exterior; remata con cuello de ganso']]],
+ [/Ramal Y 45° reductor/, ()=>[['Qué hace','Une un ramal Ø50 a la matriz Ø110 en ángulo de 45°, en una sola pieza']]],
+ [/Ramal Y 45° PVC 110×110/, ()=>[['Qué hace','Une el desagüe Ø110 del inodoro a la matriz en ángulo de 45°']]],
+ [/salida del sifón al muro/, ()=>[['Qué hace','Recibe el sifón del lavamanos en el muro, a 0,45 m del piso'],['Recorrido','El desagüe baja por dentro del tabique y sigue bajo el piso hasta la matriz']]],
+ [/Codo 87,5°/, ()=>[['Qué hace','Cambio de dirección en desagües (se usa 87,5° y no 90° para que el agua escurra)']]],
+ [/Codo 45° PVC 75 mm \(ventilación\)/, ()=>[['Qué hace','Desvío de la ventilación: la deja vertical junto al muro o paralela a la fachada']]],
+ [/ventilación, sube/, ()=>[['Qué hace','La ventilación enterrada gira y sube adosada al muro exterior']]],
+ [/Codo 45° PVC/, ()=>[['Qué hace','Desvío suave del desagüe']]],
+ [/Reducción PVC 110×50/, ()=>[['Qué hace','Pasa del ramal Ø50 de cabeza a la matriz Ø110']]],
+ [/Pileta de piso/, ()=>[['Qué es','Pileta de piso sifonada con rejilla'],['Reglamento','Sello hidráulico mínimo 50 mm (RIDAA art. 89)'],['Salida','Ø50']]],
+ [/Tee PVC 75 mm \(unión/, ()=>[['Qué hace','Une en el entretecho la ventilación de un baño con la línea común'],['Reglamento','Se pueden unir ventilaciones con piezas adecuadas (RIDAA art. 97 m)']]],
+ [/Tee PVC 75 mm \(salida/, ()=>[['Qué hace','Punto donde la línea común de ventilación sube y sale por la cubierta (única salida al techo)']]],
+ [/Reducción PVC 110×75/, ()=>[['Qué hace','Pasa de la matriz Ø110 a la ventilación Ø75, dentro del tabique']]],
+ [/cabeza de matriz, sube/, ()=>[['Qué hace','La matriz termina bajo el muro y se prolonga hacia arriba como ventilación'],['Reglamento','RIDAA art. 97 d y f: la ventilación es la prolongación vertical de la tubería']]],
+ [/Terminal HE PPR 32/, ()=>[['Qué es','Terminal PPR con inserto de rosca exterior 3/4"'],['Para qué','Ahí se conecta el flexible del termo']]],
+ [/Tapón PVC 110/, ()=>[['Qué es','Tapa la cabeza de la matriz (punto más alto, aguas arriba del primer ramal)']]],
+ [/Malla PVC/, ()=>[['Qué es','Boca de la ventilación mirando hacia abajo, con malla contra insectos y hojas']]],
+ [/cuello de ganso/, ()=>[['Qué hace','Da vuelta la ventilación para que la boca quede hacia abajo y no entre agua de lluvia']]],
+ [/Ramal Y 45° reductor PVC 110×75/, ()=>[['Qué hace','Saca la ventilación Ø75 desde la matriz, hacia arriba a 45°, junto a la fachada']]],
+ [/Sifón PVC Ø50 mm, boca/, ()=>[['Qué es','Desagüe de lavadora o secadora al ras del muro: boca a 0,80 m y sifón dentro del tabique'],['Salida','Ø50, baja por el muro hasta el ramal']]],
+ [/Ramal Y 45° PVC 50×50/, ()=>[['Qué hace','Junta el desagüe de la secadora con el de la lavadora']]],
+ [/llegada de la desgrasadora/, ()=>[['Qué hace','La salida de la desgrasadora entra al colector a 45°, entre dos cámaras (no a una cámara)']]],
+ [/Sombrerete/, ()=>[['Qué es','Remate de la ventilación sobre la cubierta, evita que entre agua de lluvia']]],
+ [/Cámara de inspección/, ()=>[['Qué es','Cámara prefabricada con registro, permite limpiar la red']]],
+ [/desgrasadora/i, ()=>[['Qué es','Retiene la grasa de cocina y quincho antes de la fosa']]],
+ [/Fosa séptica/, ()=>[['Qué es','Fosa séptica tricapa 2400 L con su kit']]],
+];
+function ficha(t){ for (const [re,f] of FICHAS){ const m = t.match(re); if (m) return f(m).map(([k,v])=>fila(k,v)).join(''); } return ''; }
+function fila(k,v){ return `<dt>${k}</dt><dd>${v}</dd>`; }
+function mostrar(ud, punto){
+  let h = '';
+  if (ud.tipo==='tubo'){
+    const t = ud.t, i = t.i;
+    const z0 = t.p[0][2], z1 = t.p[t.p.length-1][2];
+    h = `<h3>${i.tipo}</h3><dl>${fila('Sistema', SIS[t.s].n)}${fila('Diámetro', 'Ø'+t.d+' mm')}${fila('Largo del tramo', num(i.largo)+' m')}` + ficha(i.tipo) +
+        (i.pendiente? fila('Pendiente', i.pendiente):'') + (i.recinto? fila('Recinto', i.recinto):'') + (i.ubicacion? fila('Ubicación', i.ubicacion):'') +
+        (i.altura_salida? fila('Altura de salida', i.altura_salida):'') + (i.salida? fila('Salida', i.salida):'') +
+        fila('Cota inicio / fin', num(z0)+' / '+num(z1)+' m') + fila('Punto tocado', `x ${num(punto[0])} · y ${num(punto[1])} · z ${num(punto[2])}`) + '</dl>';
+  } else if (ud.tipo==='artefacto'){
+    const a = ud.a;
+    h = `<h3>${a.nom}</h3><dl>${fila('Recinto', a.rec)}${fila('Altura de la salida de agua', a.alt)}${fila('Detalle', a.info)}</dl>`;
+  } else if (ud.tipo==='pieza'){
+    const p = ud.p;
+    h = `<h3>${p.t}</h3><dl>${fila('Sistema', SIS[p.s].n)}${fila('Medida', 'Ø'+p.d+' mm')}` + ficha(p.t) +
+        Object.entries(p.i||{}).map(([k,v])=>fila(k[0].toUpperCase()+k.slice(1), v)).join('') +
+        fila('Ubicación', `x ${num(p.p[0])} · y ${num(p.p[1])} · z ${num(p.p[2])} m`) + '</dl>';
+  } else {
+    const c = ud.c;
+    h = `<h3>${c.t}</h3><dl>${ficha(c.t)}${fila('Medidas', c.tam.map(v=>num(Math.abs(v))).join(' × ')+' m')}${fila('Centro', `x ${num(c.c[0])} · y ${num(c.c[1])} · z ${num(c.c[2])}`)}</dl>`;
+  }
+  info.innerHTML = h + '<div class="sub" style="margin-top:6px">Coordenadas: x e y en metros desde el eje A y el borde sur; z = altura sobre el piso terminado (negativo = bajo el piso).</div>';
+  info.hidden = false;
+}
+function aPlanta(v){ return [v.x, -v.z, v.y]; }
+canvas.addEventListener('pointerdown', e=>{ canvas._d=[e.clientX,e.clientY]; });
+canvas.addEventListener('pointerup', e=>{
+  if (!canvas._d || Math.hypot(e.clientX-canvas._d[0], e.clientY-canvas._d[1])>5) return;
+  const r = canvas.getBoundingClientRect();
+  mouse.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(pick.filter(m=>{ let o=m; while(o){ if(!o.visible) return false; o=o.parent;} return true; }), false)[0];
+  if (!hit){ limpiar(); info.hidden = true; return; }
+  resaltar(objetosDe(hit.object.userData, hit.object));
+  const pt = aPlanta(hit.point);
+  if (bMed.getAttribute('aria-pressed')==='true'){
+    // ajusta a la pieza o al extremo del tramo más cercano
+    let snap = hit.object.userData.p ? P(hit.object.userData.p.p) : hit.object.position.clone();
+    if (hit.object.userData.tipo==='tubo'){ const t = hit.object.userData.t; let best=null;
+      t.p.forEach(q=>{ const v=P(q); const d=v.distanceTo(hit.point); if(!best||d<best[0]) best=[d,v]; }); snap = best[1]; }
+    puntos.push(snap); if (puntos.length>2) puntos = [snap];
+    if (lineaMed){ scene.remove(lineaMed); lineaMed=null; }
+    if (puntos.length===2){
+      const [a,b] = puntos; const g = new THREE.BufferGeometry().setFromPoints([a,b]);
+      lineaMed = new THREE.Line(g, new THREE.LineBasicMaterial({color:css('--accent'), depthTest:false})); lineaMed.renderOrder=20; scene.add(lineaMed);
+      const pa=aPlanta(a), pb=aPlanta(b);
+      medida.textContent = `Distancia ${num(a.distanceTo(b))} m · Δx ${num(Math.abs(pb[0]-pa[0]))} · Δy ${num(Math.abs(pb[1]-pa[1]))} · Δz ${num(Math.abs(pb[2]-pa[2]))}`;
+    } else medida.textContent = 'Tocá el segundo punto (se ajusta a la pieza o al extremo del caño)';
+    medida.hidden = false;
+  }
+  mostrar(hit.object.userData, pt);
+});
+bMed.onclick=()=>{ const on = bMed.getAttribute('aria-pressed')!=='true'; bMed.setAttribute('aria-pressed', on); puntos=[];
+  if (lineaMed){ scene.remove(lineaMed); lineaMed=null; }
+  medida.hidden = !on; if (on) medida.textContent = 'Tocá dos piezas o extremos de caño'; };
+
+
+// ---------- navegación de cerca ----------
+const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let vuelo = null;
+function volar(destino, dist){
+  const dir = camera.position.clone().sub(controls.target).normalize();
+  const t1 = destino.clone(), c1 = destino.clone().add(dir.multiplyScalar(dist));
+  if (reducir){ controls.target.copy(t1); camera.position.copy(c1); controls.update(); return; }
+  vuelo = {t0:controls.target.clone(), c0:camera.position.clone(), t1, c1, k:0};
+}
+function pasoVuelo(){
+  if (!vuelo) return;
+  vuelo.k = Math.min(1, vuelo.k + 0.07); const e = 1 - Math.pow(1 - vuelo.k, 3);
+  controls.target.lerpVectors(vuelo.t0, vuelo.t1, e); camera.position.lerpVectors(vuelo.c0, vuelo.c1, e);
+  if (vuelo.k >= 1) vuelo = null;
+}
+function visibles(){ return pick.filter(m=>{ let o=m; while(o){ if(!o.visible) return false; o=o.parent;} return true; }); }
+function bajoCursor(e){
+  const r = canvas.getBoundingClientRect();
+  mouse.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(mouse, camera);
+  return ray.intersectObjects(visibles(), false)[0];
+}
+// la rueda acerca hacia el punto que señala el mouse (y no siempre hacia el centro)
+function zoomA(e, f){            // acerca (f<0) o aleja (f>0) la cámara hacia el punto bajo el mouse o los dedos
+  const hit = bajoCursor(e);
+  let p;
+  if (hit) p = hit.point;
+  else { const n = camera.getWorldDirection(new THREE.Vector3());
+         const pl = new THREE.Plane().setFromNormalAndCoplanarPoint(n, controls.target);
+         p = ray.ray.intersectPlane(pl, new THREE.Vector3()) || controls.target.clone(); }
+  const d = camera.position.distanceTo(p);
+  if (f < 0 && d < 0.05) return;
+  // escala la escena alrededor del punto p: la cámara y el centro de giro se acercan (o alejan) juntos, sin pasarse
+  const k = 1 + f;
+  camera.position.sub(p).multiplyScalar(k).add(p);
+  controls.target.sub(p).multiplyScalar(k).add(p);
+  controls.update();
+}
+canvas.addEventListener('wheel', e=>{
+  e.preventDefault();
+  zoomA(e, Math.sign(e.deltaY) * Math.min(0.25, Math.abs(e.deltaY)/600 + 0.06));
+}, {passive:false});
+// celular: pellizcar con dos dedos para acercar o alejar (hacia el punto entre los dedos)
+let pinza = null, ultimaPinza = 0;
+const distDedos = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+canvas.addEventListener('touchstart', e=>{ pinza = e.touches.length === 2 ? distDedos(e.touches) : null; }, {passive:true});
+canvas.addEventListener('touchmove', e=>{
+  if (e.touches.length !== 2 || !pinza) return;
+  const d = distDedos(e.touches); if (d < 1) return;
+  const r = d / pinza; pinza = d;
+  if (Math.abs(r - 1) < 0.002) return;
+  const medio = {clientX: (e.touches[0].clientX + e.touches[1].clientX) / 2, clientY: (e.touches[0].clientY + e.touches[1].clientY) / 2};
+  zoomA(medio, Math.max(-0.35, Math.min(0.35, 1 / r - 1)));
+  ultimaPinza = Date.now();
+}, {passive:true});
+canvas.addEventListener('touchend', e=>{ if (e.touches.length < 2) pinza = null; }, {passive:true});
+// doble clic / doble toque: centra la vista en ese punto y se acerca
+canvas.addEventListener('dblclick', e=>{
+  const hit = bajoCursor(e); if (!hit) return;
+  const ud = hit.object.userData;
+  const centro = ud.tipo==='pieza' ? P(ud.p.p) : hit.point.clone();
+  volar(centro, ud.tipo==='caja' ? 2.2 : 0.45);
+});
+let ultimoToque = 0;
+canvas.addEventListener('touchend', e=>{
+  const ahora = Date.now();
+  if (e.touches.length || ahora - ultimaPinza < 500){ ultimoToque = 0; return; }
+  if (ahora - ultimoToque < 320 && e.changedTouches[0]){
+    const t = e.changedTouches[0]; const hit = bajoCursor(t);
+    if (hit){ const c = hit.object.userData.tipo==='pieza' ? P(hit.object.userData.p.p) : hit.point.clone(); volar(c, 0.45); }
+  }
+  ultimoToque = ahora;
+});
+// recorrido pieza por pieza
+let orden = [], iPieza = -1;
+function armarOrden(){
+  orden = D.piezas.filter(p=>p._cuerpo && grupos[p.s].visible);
+  orden.sort((a,b)=> (a.s+a.p[0].toFixed(1)+a.p[1].toFixed(1)).localeCompare(b.s+b.p[0].toFixed(1)+b.p[1].toFixed(1)));
+}
+function irPieza(k){
+  armarOrden(); if (!orden.length) return;
+  iPieza = (k + orden.length) % orden.length;
+  const p = orden[iPieza];
+  resaltar([p._cuerpo]);
+  volar(P(p.p), 0.45);
+  mostrar({tipo:'pieza', p}, p.p);
+  info.insertAdjacentHTML('afterbegin', `<div class="sub">Pieza ${iPieza+1} de ${orden.length} (solo capas visibles)</div>`);
+}
+const bAnt = document.createElement('button'); bAnt.type='button'; bAnt.textContent='◀ Pieza'; bAnt.onclick=()=>irPieza(iPieza-1);
+const bSig = document.createElement('button'); bSig.type='button'; bSig.textContent='Pieza ▶'; bSig.onclick=()=>irPieza(iPieza+1);
+barra.appendChild(bAnt); barra.appendChild(bSig);
+// teclado: flechas para recorrer piezas
+window.addEventListener('keydown', e=>{ if (e.target.tagName==='INPUT') return;
+  if (e.key==='ArrowRight') irPieza(iPieza+1); if (e.key==='ArrowLeft') irPieza(iPieza-1); });
+// opacidad de muros
+{
+  const l = document.createElement('label'); l.textContent = 'Muros ';
+  const r = document.createElement('input'); r.type='range'; r.min='0'; r.max='0.8'; r.step='0.05'; r.value='0.28'; r.id='opacidad-muros';
+  r.setAttribute('aria-label','Transparencia de muros'); r.style.width='90px';
+  r.oninput=()=>{ matMuro.opacity = +r.value; matBorde.opacity = Math.min(1, +r.value*2); };
+  l.appendChild(r); capas.appendChild(l);
+}
+
+// en el celular las capas se esconden detrás de un botón para dejar más lugar al modelo
+{
+  const bC = document.createElement('button'); bC.type='button'; bC.id='bCapas'; bC.textContent='Capas';
+  barra.insertBefore(bC, barra.firstChild);
+  const chico = matchMedia('(max-width:820px)');
+  if (chico.matches) capas.classList.add('oculta');
+  bC.setAttribute('aria-pressed', String(!capas.classList.contains('oculta')));
+  bC.onclick=()=>{ capas.classList.toggle('oculta'); bC.setAttribute('aria-pressed', String(!capas.classList.contains('oculta'))); };
+}
+// los caños se dibujan siempre por encima de muros y artefactos transparentes (no quedan opacados)
+['F','C','A','V','D'].forEach(k=>grupos[k].traverse(o=>{
+  if (!o.isMesh) return;
+  o.renderOrder = 5;
+  const m = o.material;
+  if (m && !m.transparent){ m.transparent = true; m.opacity = 1; m.needsUpdate = true; }
+}));
+// ---------- panel ----------
+const TABS = {
+ 'Referencias': ()=>{
+   const ley = Object.entries(SIS).map(([k,s])=>`<span class="sw" style="background:${css(s.v)}"></span><span>${s.n}</span>`).join('') +
+     `<span class="sw" style="background:linear-gradient(90deg,#7fb0e6,#ec8b78);height:12px"></span><span>Uniones: mismo color que su red, un tono más claro (codo, tee, reducción, ramal)</span>`+
+     `<span class="sw" style="background:#c0392b;height:12px"></span><span>Manilla de llave de paso / llave general</span>`+
+     `<span class="sw" style="background:#9aa09d;height:12px;opacity:.6"></span><span>Muros (a 2,40 m de altura)</span>`;
+   return `<h2>Colores</h2><div class="ley">${ley}</div>
+   <h2>Materiales</h2>
+   <table><tr><th>Red</th><th>Material</th></tr>
+   <tr><td>Agua fría y caliente</td><td>PPR por termofusión: fría PN16, caliente PN20 con coquilla aislante en todo el tramo enterrado. Troncales Ø32, llegada a cada artefacto Ø20 (tee reducida 32-20-32). Salidas con codo HI 20-1/2" y llave angular HE-HE 1/2".</td></tr>
+   <tr><td>Alcantarillado</td><td>PVC sanitario gris (NCh 1779), uniones cementadas. Ramales Ø50, matrices y colector Ø110. Ramal Y 45° reductor 110×50.</td></tr>
+   <tr><td>Ventilación</td><td>PVC Ø75. Una por matriz: sale con ramal Y a 45° junto a la fachada, sube adosada al muro exterior y remata con cuello de ganso a 0,60 m (como en la foto de obra).</td></tr>
+   <tr><td>Lavadora y secadora</td><td>Dos desagües Ø50 al ras del muro, boca a 0,80 m con sifón.</td></tr>
+   <tr><td>Duchas</td><td>Pileta de piso sifonada, salida Ø50.</td></tr></table>
+   <h2>Alturas de salida (eje sobre N.P.T.)</h2>
+   <table><tr><th>Artefacto</th><th class="n">Altura</th><th class="n">Separación</th></tr>
+   <tr><td>Lavamanos</td><td class="n">0,50</td><td class="n">0,15</td></tr>
+   <tr><td>Lavaplatos y pileta</td><td class="n">0,52</td><td class="n">0,15</td></tr>
+   <tr><td>Inodoro (llave a la izquierda, a 0,25 del eje)</td><td class="n">0,25</td><td class="n">—</td></tr>
+   <tr><td>Ducha (monomando con barra)</td><td class="n">0,95</td><td class="n">0,10</td></tr>
+   <tr><td>Lavadora (fría y caliente)</td><td class="n">0,72</td><td class="n">0,15</td></tr>
+   <tr><td>Refrigerador (para fábrica de hielo)</td><td class="n">0,50</td><td class="n">—</td></tr>
+   <tr><td>Tina de borde*</td><td class="n">0,40</td><td class="n">0,15</td></tr>
+   <tr><td>Termo eléctrico (conexiones, como Coyhaique 2)</td><td class="n">1,10</td><td class="n">—</td></tr>
+   <tr><td>Llaves de paso del recinto</td><td class="n">0,25</td><td class="n">0,15</td></tr></table>
+   <div class="sub">* valor supuesto, falta confirmar. Fría a la derecha y caliente a la izquierda, parado frente al artefacto.</div>
+   <h2>Niveles bajo el piso</h2>
+   <table><tr><td>Agua caliente (eje, enterrada bajo el radier)</td><td class="n">−0,30</td></tr><tr><td>Agua fría (eje, misma zanja, 6 cm más honda)</td><td class="n">−0,36</td></tr>
+   <tr><td>Matriz Ø110 en la cabeza (clave)</td><td class="n">−0,45</td></tr><tr><td>Pendiente de ramales, matrices y colector</td><td class="n">2 %</td></tr></table>`;
+ },
+ 'Profundidades': ()=> `<h2>Alcantarillado: largo y profundidad de la clave</h2>
+   <table><tr><th>Tramo</th><th class="n">Largo</th><th class="n">Inicio</th><th class="n">Fin</th></tr>` +
+   D.perfiles.map(p=>`<tr><td>${p.n}</td><td class="n">${num(p.largo)} m</td><td class="n">${num(p.z_ini)} m</td><td class="n">${num(p.z_fin)} m</td></tr>`).join('') +
+   `</table><div class="sub">Profundidad bajo el piso terminado de la casa. Todos los tramos al 2 % (el RIDAA art. 88 pide 3 % en general y acepta hasta 1 % en casos justificados).</div>`,
+ 'Materiales': ()=> {
+   let cat=''; return `<h2>Cubicación referencial (salida del modelo)</h2><div class="sub">Tocá un material para verlo marcado en el modelo.</div><table><tr><th>Material</th><th class="n">Cant.</th><th>Un.</th></tr>` +
+   D.materiales.map(m=>{ const h = m[0]!==cat ? `<tr><th colspan="3" style="padding-top:10px">${m[0]}</th></tr>`:''; cat=m[0];
+     return h+`<tr data-mat="${D.materiales.indexOf(m)}" style="cursor:pointer"><td>${m[1].replace(/(\d)\.(\d)/g,'$1,$2')}</td><td class="n">${m[2]}</td><td>${m[3]}</td></tr>`; }).join('') +
+   `</table><div class="sub">Largos +10 % de pérdida. Tiras PPR de 4 m y PVC de 6 m. Las coplas de unión entre tiras son aproximadas.</div>`; },
+ 'Ir a': ()=> {
+   const porRec = {}; D.salidas.forEach((s,i)=>{(porRec[s.rec] ||= []).push([s,i]);});
+   return `<h2>Salidas de cada artefacto</h2><div class="sub">Tocá una salida para ir a mirarla de cerca.</div>` +
+     Object.entries(porRec).map(([r,l])=>`<h2>${r}</h2><div style="display:flex;flex-wrap:wrap;gap:6px">`+
+       l.map(([s,i])=>`<button type="button" data-ir="${i}">${s.t}</button>`).join('')+'</div>').join('') +
+     `<h2>Cómo mirar de cerca</h2><table>
+       <tr><td>Doble clic / doble toque</td><td>Centra y acerca a esa pieza o punto del caño</td></tr>
+       <tr><td>Rueda del mouse</td><td>Acerca hacia donde apunta el mouse</td></tr>
+       <tr><td>Arrastrar</td><td>Gira alrededor del punto elegido</td></tr>
+       <tr><td>Botón derecho / dos dedos</td><td>Desplaza la vista</td></tr>
+       <tr><td>◀ Pieza ▶ o flechas del teclado</td><td>Recorre las uniones una por una</td></tr>
+       <tr><td>Control "Muros"</td><td>Hace los muros más o menos transparentes</td></tr></table>`; },
+ 'Revisar': ()=> {
+   const v = D.validacion || {problemas:[], uniones:0, avisos:[]};
+   const graves = v.problemas.filter(p=>p.grave), definir = v.problemas.filter(p=>!p.grave);
+   const item = p=>`<div class="nota"><b>${p.tipo[0].toUpperCase()+p.tipo.slice(1)} · ${p.red}</b><br>${p.txt}<br><button type="button" data-prob="${v.problemas.indexOf(p)}" style="margin-top:6px">Ir a verlo</button></div>`;
+   const ve = D.ventilacion;
+   const rev = `<h2>Advertencias</h2>
+     ${graves.length ? graves.map(item).join('') : `<div class="nota"><b>Uniones (${v.uniones} revisadas):</b> sin problemas. Todas se arman con piezas comerciales y ninguna red toca a otra.</div>`}
+     ${definir.map(item).join('')}
+     ${(v.avisos || []).map(t=>`<div class="nota"><b>Ojo:</b> ${t}</div>`).join('')}
+     ${ve ? `<div class="nota"><b>Ventilaciones y el RIDAA:</b> el art. 97 pide que la ventilación remate 0,60 m sobre la cubierta. Rematada a ${num(ve.remate)} m sobre el piso con cuello de ganso, como en la foto, es una solución de obra que el inspector puede observar. Si lo piden, basta con prolongar los mismos tubos por la fachada hasta sobre el alero.</div>` : ''}
+     <div class="nota"><b>Agua enterrada y heladas:</b> bajo el radier la caliente va 6 cm más arriba que la fría (caliente −0,30, fría −0,36). El tramo de fría que va por fuera de la casa, desde la casilla del medidor hasta el radier, no queda protegido por la casa: conviene llevarlo más hondo, bajo la profundidad a la que se congela el suelo en la zona (confirmarla con la sanitaria o el ITO).</div>
+     <div class="nota"><b>Profundidad de la fosa:</b> con 2 % en todo el recorrido, el caño llega a la fosa a unos ${num(D.perfiles[D.perfiles.length-1].z_fin)} m bajo el piso de la casa. Conviene revisarlo con el nivel del terreno: si el terreno baja hacia la fosa, la excavación es menor.</div>`;
+   const pu = D.puentes.map(p=>`<div class="nota"><b>Tramo agregado en ${p.red}:</b> en tu planta el ramal que alimenta el baño 04 y el lavaplatos de la cocina no llegaba a la troncal (quedaban ${num(p.largo)} m sin caño). En el modelo lo uní a la troncal. Revisalo en la planta.</div>`).join('');
+   if (D.obra && D.obra !== 'coyhaique') return rev + '<h2>Para confirmar</h2>' + pu + (D.notas_obra || []).map(t=>`<div class="nota">${t}</div>`).join('');
+   return rev + `<h2>Recomendaciones</h2>
+   <div class="nota"><b>Ramales de agua en Ø25:</b> hoy todo tramo que alimenta 2 o más artefactos va en Ø32. El caño principal, que puede dar agua a varios recintos a la vez, sí necesita Ø32; pero el ramal que entra a un solo recinto (por ejemplo, solo al baño 11) nunca lleva más agua que la de ese recinto y alcanza con Ø25. Serían unos 24 m (fría y caliente) que pasan de Ø32 a Ø25, con tees y codos más chicos y más baratos. Además el agua caliente llega antes: cada 10 m de Ø32 guardan unos 3,5 litros de agua fría que hay que dejar correr, en Ø25 unos 2,2 litros. Las llegadas a cada artefacto siguen en Ø20. En obra aparece una medida más de caño (32, 25 y 20).</div>
+   <div class="nota"><b>Refrigerador:</b> salida a 0,50 (como bajo un lavamanos) con llave angular, para la fábrica de hielo; conviene dejarla en una caja empotrada para que el refrigerador quede pegado al muro.</div>
+   <h2>Para confirmar</h2>${pu}
+   <div class="nota"><b>Llaves de paso del recinto:</b> están a 0,25 bajo el lavamanos (o el lavaplatos), como en Coyhaique 2. Falta definir cómo pasa la red del recinto por esa llave: ¿la red sube por el muro hasta la llave y vuelve a bajar, o se distribuye por dentro del muro después de la llave?</div>
+   <div class="nota"><b>Secadora:</b> la puse a 0,65 m a la izquierda de la lavadora, en el mismo muro. Su desagüe se junta con el de la lavadora antes de ir a la matriz. Confirmar la posición.</div>
+   <div class="nota"><b>Matriz del baño 11:</b> en tu esbozo hay un tramo sin dibujar bajo el dormitorio; la dejé continua en línea recta hasta la C.I. 3.</div>
+   <div class="nota"><b>Desgrasadora:</b> la corrí 15 cm al norte de tu esbozo para que la ventilación de la matriz de grasas pase entre el muro y la cámara.</div>
+   <div class="nota"><b>Termo eléctrico:</b> conexiones a 1,10 m, como en Casa Coyhaique 2. Falta confirmar capacidad y modelo.</div>
+   <div class="nota"><b>Tina:</b> altura de la grifería 0,40 supuesta.</div>`; },
+};
+const tabs = document.getElementById('tabs'), cont = document.getElementById('contenido');
+Object.keys(TABS).forEach((k,i)=>{ const b=document.createElement('button'); b.type='button'; b.role='tab'; b.id='tab-'+i; b.textContent=k;
+  b.onclick=()=>{ [...tabs.children].forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); cont.innerHTML=TABS[k](); };
+  tabs.appendChild(b); });
+tabs.children[0].click();
+function objetosMaterial(nombre){
+  const objs = []; let m;
+  if ((m = nombre.match(/Tubería PPR Ø(\d+).*agua (fría|caliente)/))){
+    const s = m[2]==='fría' ? 'F' : 'C'; tuboMeshes.forEach(o=>{ if (o.userData.t.s===s && o.userData.t.d===+m[1]) objs.push(o); });
+  } else if ((m = nombre.match(/Tubo PVC.*Ø(\d+)/))){
+    const s = /perforado/.test(nombre) ? 'D' : /ventilación/.test(nombre) ? 'V' : 'A';
+    tuboMeshes.forEach(o=>{ if (o.userData.t.s===s && o.userData.t.d===+m[1]) objs.push(o); });
+  } else {
+    D.piezas.forEach(p=>{ if (p._cuerpo && (p.t===nombre || nombre.startsWith(p.t) || p.t.startsWith(nombre))) objs.push(p._cuerpo); });
+    pick.forEach(o=>{ if (o.userData.tipo==='caja' && (o.userData.c.t.startsWith(nombre) || o.userData.c.t.startsWith(nombre.split(' ')[0]+' '+(nombre.split(' ')[1]||'')))) objs.push(o); });
+  }
+  return objs;
+}
+cont.addEventListener('click', e=>{
+  const fm = e.target.closest('[data-mat]');
+  if (fm){
+    [...cont.querySelectorAll('[data-mat]')].forEach(x=>x.style.background='');
+    fm.style.background = 'var(--chip)';
+    const mt = D.materiales[+fm.dataset.mat], objs = objetosMaterial(mt[1]);
+    info.hidden = false;
+    if (!objs.length){ limpiar(); info.innerHTML = `<h3>${mt[1]}</h3><div class="sub">Este material no se dibuja como pieza en el modelo (se compra igual: ${mt[2]} ${mt[3]}).</div>`; return; }
+    resaltar(objs);
+    const caja = new THREE.Box3(); objs.forEach(o=>caja.expandByObject(o));
+    const c = caja.getCenter(new THREE.Vector3()), t = Math.max(caja.getSize(new THREE.Vector3()).length(), 0.6);
+    controls.target.copy(c); camera.position.copy(c).add(new THREE.Vector3(t*.6, t*.7, t*.75)); controls.update();
+    info.innerHTML = `<h3>${mt[1]}</h3><dl>${fila('Cantidad a comprar', mt[2]+' '+mt[3])}${fila('Marcados en el modelo', objs.length + (objs[0].userData.tipo==='tubo' ? ' tramos' : ' unidades'))}${ficha(mt[1])}</dl><div class="sub">Se ven en color de acento. Tocá el fondo para limpiar.</div>`;
+    return;
+  }
+  const pb = e.target.closest('[data-prob]');
+  if (pb){ const q = D.validacion.problemas[+pb.dataset.prob]; volar(P(q.p), 0.7); info.hidden = false;
+    info.innerHTML = `<h3>${q.tipo}</h3><div class="sub">${q.txt}</div>`; return; }
+  const b = e.target.closest('[data-ir]'); if (!b) return;
+  const s = D.salidas[+b.dataset.ir]; volar(P(s.p), 0.6); });
+
+// ---------- exportar vistas ----------
+function foto(W, H, tipo='image/png'){ // render en alta resolución de la cámara actual
+  const tam0 = renderer.getSize(new THREE.Vector2()), pr0 = renderer.getPixelRatio(), bg0 = scene.background;
+  scene.background = new THREE.Color(0xffffff);
+  renderer.setPixelRatio(1); renderer.setSize(W, H, false); camera.aspect = W/H; camera.updateProjectionMatrix();
+  controls.update(); renderer.render(scene, camera);
+  const url = canvas.toDataURL(tipo, 0.9);
+  scene.background = bg0; renderer.setPixelRatio(pr0); renderer.setSize(tam0.x, tam0.y, false); camera.aspect = tam0.x/tam0.y; camera.updateProjectionMatrix();
+  return url;
+}
+function camaraGuardar(){ return {p: camera.position.clone(), t: controls.target.clone()}; }
+function camaraVolver(c){ camera.position.copy(c.p); controls.target.copy(c.t); controls.update(); }
+function deDataURL(u){ const b = atob(u.split(',')[1]); const a = new Uint8Array(b.length); for (let i=0;i<b.length;i++) a[i]=b.charCodeAt(i); return new Blob([a], {type:'image/png'}); }
+function superior(pts){ // vista desde arriba
+  let b; if (!pts) b = new THREE.Box3(new THREE.Vector3(x0,-1.4,-y1-4), new THREE.Vector3(x1,2.5,-y0)); else { b = cajaDe(pts); b.expandByScalar(1.0); }
+  const c = b.getCenter(new THREE.Vector3()), s = b.getSize(new THREE.Vector3());
+  controls.target.copy(c); camera.position.set(c.x, c.y + Math.max(s.x, s.z)*1.25 + 2, c.z + 0.001); controls.update();
+}
+const avisoExp = document.createElement('div'); avisoExp.className = 'medida'; avisoExp.hidden = true; document.querySelector('.vista').appendChild(avisoExp);
+function avisar(t, ms){ avisoExp.textContent = t; avisoExp.hidden = false; if (ms) setTimeout(()=>avisoExp.hidden = true, ms); }
+const bPng = document.createElement('button'); bPng.type='button'; bPng.textContent='Guardar vista (PNG)'; bPng.hidden = true; barra.appendChild(bPng);
+const bPdf = document.createElement('button'); bPdf.type='button'; bPdf.textContent='Láminas detalladas (A3)'; bPdf.hidden = true; barra.appendChild(bPdf);
+const bGas = document.createElement('button'); bGas.type='button'; bGas.textContent='Láminas gasfíter (A3)'; bGas.hidden = true; barra.appendChild(bGas);
+let descargas = null;
+(async()=>{ try { descargas = await window.claude?.use?.('downloads'); } catch(e){ descargas = null; }
+  if (descargas){ bPng.hidden = false; const coy = !D.obra || D.obra === 'coyhaique'; bPdf.hidden = !coy; bGas.hidden = !coy; } })();
+async function guardar(nombre, data){
+  try { await descargas.save({filename: nombre, data}); avisar('Listo: '+nombre, 2500); }
+  catch(e){ avisar(e && e.code==='declined' ? 'Descarga cancelada' : 'No se pudo guardar ('+(e&&e.code||'error')+')', 3500); }
+}
+bPng.onclick = ()=>{ const u = foto(3200, 2000); guardar('Gasfiteria_NuevaCoyhaique_vista.png', deDataURL(u)); };
+function lamina(doc, n, total, titulo, img, chica, lado){
+  const W = 420, H = 297, m = 10;
+  doc.setDrawColor(40); doc.setLineWidth(0.5); doc.rect(m, m, W-2*m, H-2*m);
+  doc.addImage(img, 'JPEG', m+2, m+2, 300, 240);
+  doc.setLineWidth(0.25); doc.rect(m+2, m+2, 300, 240);
+  const xR = m+306, wR = W - m - 2 - xR;
+  if (chica){ doc.addImage(chica, 'JPEG', xR, m+2, wR, wR*0.75); doc.rect(xR, m+2, wR, wR*0.75);
+    doc.setFontSize(8); doc.setTextColor(90); doc.text('Vista superior', xR+2, m+2+wR*0.75+4); }
+  let y = m + 2 + (chica ? wR*0.75 + 11 : 6);
+  doc.setTextColor(20); doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.text(lado.titulo, xR, y); y += 5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+  lado.lineas.forEach(l=>{ const partes = doc.splitTextToSize(l, wR); partes.forEach(p=>{ if (y < m+238){ doc.text(p, xR, y); y += 4; } }); });
+  // referencias de color
+  let yc = m + 250 - 46; doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.text('Referencias', xR, yc); yc += 4.5; doc.setFont('helvetica','normal');
+  Object.values(SIS).forEach(s=>{ const c = new THREE.Color(css(s.v)); doc.setFillColor(c.r*255, c.g*255, c.b*255); doc.rect(xR, yc-2.6, 7, 2.6, 'F'); doc.text(s.n, xR+9, yc); yc += 4.2; });
+  doc.setFillColor(192,57,43); doc.rect(xR, yc-2.6, 7, 2.6, 'F'); doc.text('Manilla de llave de paso', xR+9, yc); yc += 4.2;
+  doc.setFillColor(201,164,58); doc.rect(xR, yc-2.6, 7, 2.6, 'F'); doc.text('Inserto de bronce 1/2" (salida)', xR+9, yc);
+  // rótulo
+  const yr = m + 246; doc.setLineWidth(0.5); doc.line(m, yr, W-m, yr);
+  doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.text('CASA NUEVA COYHAIQUE - DETALLE DE GASFITERÍA', m+4, yr+10);
+  doc.setFontSize(11); doc.text(titulo, m+4, yr+18);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  doc.text('Agua fría PPR PN16 y caliente PPR PN20 con coquilla, termofusión (troncal Ø32, bajadas Ø20). Alcantarillado: PVC sanitario gris NCh 1779 (Ø110 y Ø50), pendiente 2 %, ventilación Ø75 (RIDAA).', m+4, yr+25);
+  doc.text('Vista 3D sin escala. Alturas de salida al eje sobre N.P.T. Medidas y profundidades de referencia: verificar en obra.', m+4, yr+30);
+  doc.line(W-m-70, yr, W-m-70, H-m);
+  doc.setFontSize(8); doc.text('Lámina', W-m-66, yr+7); doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.text(`G-${String(n).padStart(2,'0')}`, W-m-66, yr+16);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.text(`${n} de ${total}`, W-m-40, yr+16);
+  doc.text(new Date().toLocaleDateString('es-CL'), W-m-66, yr+26);
+}
+bPdf.onclick = async ()=>{
+  // juego completo de láminas A3 a escala (PDF armado aparte, publicado junto a este visor)
+  bPdf.disabled = true; avisar('Preparando las láminas…');
+  try {
+    const r = await fetch('Gasfiteria_NuevaCoyhaique_laminas_detallado.pdf');
+    if (!r.ok) throw new Error('no se encontró el archivo de láminas');
+    await guardar('Gasfiteria_NuevaCoyhaique_laminas_detallado.pdf', await r.blob());
+  } catch(e){ avisar('No se pudieron descargar las láminas: ' + e.message, 5000); }
+  bPdf.disabled = false;
+};
+
+bGas.onclick = async ()=>{
+  bGas.disabled = true; avisar('Preparando las láminas para el gasfíter…');
+  try {
+    const r = await fetch('Gasfiteria_NuevaCoyhaique_gasfiter.pdf');
+    if (!r.ok) throw new Error('no se encontró el archivo');
+    await guardar('Gasfiteria_NuevaCoyhaique_gasfiter.pdf', await r.blob());
+  } catch(e){ avisar('No se pudieron descargar las láminas: ' + e.message, 5000); }
+  bGas.disabled = false;
+};
+
+// ---------- bucle ----------
+function tam(){ const v = canvas.parentElement; const w=v.clientWidth, h=v.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+new ResizeObserver(tam).observe(canvas.parentElement); tam();
+function fondo(){ scene.background = new THREE.Color(css('--escena')); }
+fondo(); matchMedia('(prefers-color-scheme: dark)').addEventListener('change', fondo);
+new MutationObserver(fondo).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+enfocar(null);
+(function loop(){ requestAnimationFrame(loop); pasoVuelo(); controls.update(); renderer.render(scene, camera); })();
+</script>
+
+</body></html>
